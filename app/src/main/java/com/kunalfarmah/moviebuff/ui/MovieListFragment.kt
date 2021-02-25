@@ -53,7 +53,7 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
 
         fetchData()
 
-        viewModel.movies.observe(viewLifecycleOwner, {
+        viewModel.movies.observe(viewLifecycleOwner) {
             var movieList = viewModel.movies.value
             if (null != movieList && !movieList.isEmpty()) {
                 binding!!.shimmerFrameLayout.stopShimmerAnimation()
@@ -73,7 +73,7 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
             } else {
                 setNoInternetView()
             }
-        })
+        }
 
         binding!!.retry.setOnClickListener { fetchData() }
         return binding?.root
@@ -169,12 +169,17 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
             movieDetailFragment.enterTransition = Fade()
             exitTransition = Fade()
             movieDetailFragment.sharedElementReturnTransition = DetailsTransition()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .add(R.id.nav_host_fragment, movieDetailFragment)
+                .addSharedElement(image, "imageTransition")
+                .addToBackStack(MovieDetailFragment.TAG).commit()
+        }
+        else{
+            requireActivity().supportFragmentManager.beginTransaction()
+                .add(R.id.nav_host_fragment, movieDetailFragment)
+                .addToBackStack(MovieDetailFragment.TAG).commit()
         }
 
-        requireActivity().supportFragmentManager.beginTransaction()
-            .add(R.id.nav_host_fragment, movieDetailFragment)
-            .addSharedElement(image, "imageTransition")
-            .addToBackStack(MovieDetailFragment.TAG).commit()
     }
 
     class DetailsTransition : TransitionSet() {

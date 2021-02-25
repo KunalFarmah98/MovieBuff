@@ -24,7 +24,6 @@ class MoviesViewModel
 @ViewModelInject
 constructor(
     private val moviesRepository: MoviesRepository,
-    @Assisted private val savedStateHandle: SavedStateHandle,
     application: Application
 ) : AndroidViewModel(application) {
 
