@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Movie Buff</string>
+    <string name="title_activity_movies">MoviesActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Kunal Farmah</string>
+    <string name="nav_header_subtitle">kunalfarmah98@gmail.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="popular_movies">Popular Movies</string>
+    <string name="title_activity_main">Popular Movies</string>
+    <string name="action_about">About Me</string>
+    <string name="about">About</string>
+    <string name="rating">rating</string>
+    <string name="release_date">Release Date</string>
+    <string name="language">language</string>
+    <string name="runtime">runtime</string>
+    <string name="overview">Overview:</string>
+    <string name="images">Images</string>
+    <string name="reviews">Reviews</string>
+    <string name="no_internet_connection">No Internet Connection</string>
+    <string name="retry">Retry</string>
+</resources>
