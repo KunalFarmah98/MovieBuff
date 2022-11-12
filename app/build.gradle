@@ -90,6 +90,7 @@ dependencies {
     kapt "androidx.room:room-compiler:$room"
 
     implementation 'com.facebook.shimmer:shimmer:0.1.0@aar'
+    implementation 'com.jakewharton.timber:timber:5.0.1'
 
 }
 

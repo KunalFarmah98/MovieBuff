@@ -25,7 +25,10 @@ class MovieEntity(
     val genreIds: String,
 
     @ColumnInfo(name = "release_date")
-    val releaseDate: String
+    val releaseDate: String,
+
+    @ColumnInfo(name = "vote_average")
+    val voteAverage: Double
 )
 
 

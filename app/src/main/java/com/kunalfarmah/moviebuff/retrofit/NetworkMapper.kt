@@ -18,7 +18,8 @@ constructor():
             posterPath = entity.image,
             popularity = entity.popularity,
             releaseDate = entity.releaseDate,
-            genreIds = Gson().fromJson(entity.genreIds, object: TypeToken<List<Int?>?>() {}.type)
+            genreIds = Gson().fromJson(entity.genreIds, object: TypeToken<List<Int?>?>() {}.type),
+            voteAverage = entity.voteAverage
         )
     }
 
@@ -32,7 +33,8 @@ constructor():
             image = path,
             popularity = domainModel.popularity ?: 0.0,
             releaseDate = domainModel.releaseDate ?: "",
-            genreIds = Gson().toJson(domainModel.genreIds ?: ArrayList<Int>())
+            genreIds = Gson().toJson(domainModel.genreIds ?: ArrayList<Int>()),
+            voteAverage = domainModel.voteAverage ?: 0.0
         )
     }
 

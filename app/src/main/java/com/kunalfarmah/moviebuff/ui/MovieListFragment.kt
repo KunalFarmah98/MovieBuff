@@ -1,6 +1,7 @@
 package com.kunalfarmah.moviebuff.ui
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
@@ -8,26 +9,35 @@ import android.view.*
 import android.view.View.OnClickListener
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.*
 import com.kunalfarmah.moviebuff.R
+import com.kunalfarmah.moviebuff.adapter.FilterAdapter
 import com.kunalfarmah.moviebuff.adapter.MoviesAdapter
 import com.kunalfarmah.moviebuff.databinding.FragmentMovieListBinding
+import com.kunalfarmah.moviebuff.listener.FilterClickListener
 import com.kunalfarmah.moviebuff.listener.MovieClickListener
 import com.kunalfarmah.moviebuff.listener.MovieListListener
+import com.kunalfarmah.moviebuff.model.FilterItem
+import com.kunalfarmah.moviebuff.preferences.PreferenceManager
 import com.kunalfarmah.moviebuff.room.MovieEntity
+import com.kunalfarmah.moviebuff.util.Constants
 import com.kunalfarmah.moviebuff.viewmodel.MoviesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import timber.log.Timber
 
 
 @AndroidEntryPoint
 @ExperimentalCoroutinesApi
-class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, OnClickListener {
+class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, FilterClickListener {
 
     lateinit var binding: FragmentMovieListBinding
 
@@ -38,9 +48,13 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, O
 
     private val viewModel: MoviesViewModel by viewModels()
     private lateinit var mAdapter: MoviesAdapter
+    private lateinit var filterAdapter: FilterAdapter
     private var movieList = ArrayList<MovieEntity>()
     private var movieListCopy = ArrayList<MovieEntity>()
+    private var genreList = ArrayList<FilterItem>()
     private var genreMap = HashMap<String, Int>()
+    private var selectedGenre = PreferenceManager.getValue(Constants.SELECTED_FILTER, 0)
+    private var selectedOrder = PreferenceManager.getValue(Constants.SORT_ORDER, "")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,6 +62,19 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, O
     ): View {
         setHasOptionsMenu(true)
         binding = FragmentMovieListBinding.inflate(layoutInflater)
+
+        PreferenceManager.preferences?.
+           registerOnSharedPreferenceChangeListener { sharedPreferences, key ->
+               run {
+                   if (key.equals(Constants.SELECTED_FILTER)) {
+                       selectedGenre = sharedPreferences.getInt(key, 0)
+                   }
+                   else if (key.equals(Constants.SORT_ORDER)){
+                       selectedOrder = sharedPreferences.getString(key, "")
+                   }
+               }
+               Timber.d(TAG, "SharedPreferences key: $key changed")
+           }
 
         fetchData()
         populateGenres()
@@ -125,10 +152,19 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, O
                 binding.movieList.layoutManager = GridLayoutManager(context, span)
             }
             R.id.acton_sort_popularity -> {
+                PreferenceManager.putValue(Constants.SORT_ORDER, Constants.SortOrder.POPULAIRTY)
                 Toast.makeText(activity, "popularity", Toast.LENGTH_SHORT).show()
+                sortMovies(Constants.SortOrder.POPULAIRTY)
             }
             R.id.action_sort_date -> {
+                PreferenceManager.putValue(Constants.SORT_ORDER, Constants.SortOrder.RELEASE_DATE)
                 Toast.makeText(activity, "date", Toast.LENGTH_SHORT).show()
+                sortMovies(Constants.SortOrder.RELEASE_DATE)
+            }
+            R.id.acton_sort_rating -> {
+                PreferenceManager.putValue(Constants.SORT_ORDER, Constants.SortOrder.RATING)
+                Toast.makeText(activity, "date", Toast.LENGTH_SHORT).show()
+                sortMovies(Constants.SortOrder.RATING)
             }
         }
         return super.onOptionsItemSelected(item)
@@ -156,6 +192,14 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, O
         binding.movieList.setItemViewCacheSize(10)
         binding.movieList.adapter = mAdapter
         binding.movieList.visibility = View.VISIBLE
+
+        // applying filtering based on user's preference
+        setGenre(selectedGenre as Int)
+        filterMovies(getGenreId(genreList[selectedGenre as Int].genre))
+
+        //sorting based on user preferences
+        sortMovies(selectedOrder as String)
+
     }
 
     override fun setNoInternetView() {
@@ -206,6 +250,7 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, O
     }
 
     private fun populateGenres() {
+        genreMap["All"] = 0
         genreMap["Action"] = 28
         genreMap["Adventure"] = 12
         genreMap["Animation"] = 16
@@ -224,26 +269,23 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, O
         genreMap["Thriller"] = 53
         genreMap["War"] = 10752
         genreMap["Western"] = 37
+
+        var genres = genreMap.keys.toList()
+        genres.map {
+            genreList.add(FilterItem(it, false))
+        }
     }
 
 
     private fun setFilterView(){
-        binding.genreFiler.all.setCardBackgroundColor(R.color.colorPrimary)
-        binding.genreFiler.nameAll.setTextColor(R.color.white)
-
-        binding.genreFiler.all.setOnClickListener(this)
-        binding.genreFiler.action.setOnClickListener(this)
-        binding.genreFiler.adventure.setOnClickListener(this)
-        binding.genreFiler.comedy.setOnClickListener(this)
-        binding.genreFiler.drama.setOnClickListener(this)
-        binding.genreFiler.horror.setOnClickListener(this)
-        binding.genreFiler.thriller.setOnClickListener(this)
-        binding.genreFiler.mystery.setOnClickListener(this)
-        binding.genreFiler.scifi.setOnClickListener(this)
+        binding.genreFilter.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        binding.genreFilter.itemAnimator = DefaultItemAnimator()
+        filterAdapter = FilterAdapter(context, genreList, this)
+        binding.genreFilter.adapter = filterAdapter
     }
 
     private fun getGenreId(genre: String) : Int {
-        return genreMap[genre] ?: 53
+        return genreMap[genre] ?: 0
     }
 
     private fun filterMovies(genre: Int){
@@ -251,106 +293,61 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, O
         if(movieList.isNullOrEmpty())
             return
         if(genre == 0) {
-            mAdapter = MoviesAdapter(context, movieList, this)
-            mAdapter.notifyDataSetChanged()
-            return
+            mAdapter.movieList = movieListCopy
         }
-        mAdapter.movieList = movieList.filter { movie ->
-            movie.genreIds.contains(genre.toString(), false)
+        else {
+            mAdapter.movieList = movieList.filter { movie ->
+                movie.genreIds.contains(genre.toString(), false)
+            }
         }
         mAdapter.notifyDataSetChanged()
     }
 
-    override fun onClick(v: View?) {
-        when(v?.id){
-            R.id.all -> {
-                resetColors()
-                binding.genreFiler.all.setCardBackgroundColor(R.color.colorPrimary)
-                binding.genreFiler.nameAll.setTextColor(R.color.white)
-                filterMovies(0)
-            }
-            R.id.action -> {
-                resetColors()
-                binding.genreFiler.action.setCardBackgroundColor(R.color.colorPrimary)
-                binding.genreFiler.nameAction.setTextColor(R.color.white)
-                setSelectedGenre("action")
-            }
-            R.id.adventure -> {
-                resetColors()
-                binding.genreFiler.adventure.setCardBackgroundColor(R.color.colorPrimary)
-                binding.genreFiler.nameAdventure.setTextColor(R.color.white)
-                setSelectedGenre("adventure")
-            }
-            R.id.comedy -> {
-                resetColors()
-                binding.genreFiler.comedy.setCardBackgroundColor(R.color.colorPrimary)
-                binding.genreFiler.nameComedy.setTextColor(R.color.white)
-                setSelectedGenre("comedy")
-            }
-            R.id.drama -> {
-                resetColors()
-                binding.genreFiler.drama.setCardBackgroundColor(R.color.colorPrimary)
-                binding.genreFiler.nameDrama.setTextColor(R.color.white)
-                setSelectedGenre("drama")
-            }
-            R.id.horror -> {
-                resetColors()
-                binding.genreFiler.horror.setCardBackgroundColor(R.color.colorPrimary)
-                binding.genreFiler.nameHorror.setTextColor(R.color.white)
-                setSelectedGenre("horror")
-            }
-            R.id.thriller -> {
-                resetColors()
-                binding.genreFiler.thriller.setCardBackgroundColor(R.color.colorPrimary)
-                binding.genreFiler.nameThriller.setTextColor(R.color.white)
-                setSelectedGenre("thriller")
-            }
-            R.id.mystery -> {
-                resetColors()
-                binding.genreFiler.mystery.setCardBackgroundColor(R.color.colorPrimary)
-                binding.genreFiler.nameMystery.setTextColor(R.color.white)
-                setSelectedGenre("mystery")
-            }
-            R.id.scifi -> {
-                resetColors()
-                binding.genreFiler.scifi.setCardBackgroundColor(R.color.colorPrimary)
-                binding.genreFiler.nameScifi.setTextColor(R.color.white)
-                setSelectedGenre("scifi")
-            }
+    private fun setGenre(pos: Int){
+        filterAdapter.list[selectedGenre as Int].selected = false
+        filterAdapter.list[pos].selected = true
+        filterAdapter.notifyItemChanged(selectedGenre as Int)
+        filterAdapter.notifyItemChanged(pos)
+        PreferenceManager.putValue(Constants.SELECTED_FILTER, pos)
+    }
 
+    private fun sortMovies(order: String){
+        if(order == Constants.SortOrder.POPULAIRTY){
+            mAdapter.movieList = mAdapter.movieList.sortedWith(Comparator { o1, o2 ->
+                if (o1.popularity > o2.popularity)
+                    return@Comparator -1
+                else if(o1.popularity == o2.popularity)
+                    return@Comparator 0
+                else
+                    return@Comparator 1
+            })
         }
+        else if(order == Constants.SortOrder.RELEASE_DATE){
+            mAdapter.movieList = mAdapter.movieList.sortedWith(Comparator { o1, o2 ->
+                if (o1.releaseDate > o2.releaseDate)
+                    return@Comparator -1
+                else if(o1.releaseDate == o2.releaseDate)
+                    return@Comparator 0
+                else
+                    return@Comparator 1
+            })
+        }
+        else if(order == Constants.SortOrder.RATING){
+            mAdapter.movieList = mAdapter.movieList.sortedWith(Comparator { o1, o2 ->
+                if (o1.voteAverage > o2.voteAverage)
+                    return@Comparator -1
+                else if(o1.voteAverage == o2.voteAverage)
+                    return@Comparator 0
+                else
+                    return@Comparator 1
+            })
+        }
+        mAdapter.notifyDataSetChanged()
     }
-
-
-    private fun resetColors(){
-        binding.genreFiler.action.setCardBackgroundColor(R.color.white)
-        binding.genreFiler.nameAction.setTextColor(R.color.black)
-
-        binding.genreFiler.adventure.setCardBackgroundColor(R.color.white)
-        binding.genreFiler.nameAdventure.setTextColor(R.color.black)
-
-        binding.genreFiler.comedy.setCardBackgroundColor(R.color.white)
-        binding.genreFiler.nameComedy.setTextColor(R.color.black)
-
-        binding.genreFiler.drama.setCardBackgroundColor(R.color.white)
-        binding.genreFiler.nameDrama.setTextColor(R.color.black)
-
-        binding.genreFiler.thriller.setCardBackgroundColor(R.color.white)
-        binding.genreFiler.nameThriller.setTextColor(R.color.black)
-
-        binding.genreFiler.horror.setCardBackgroundColor(R.color.white)
-        binding.genreFiler.nameHorror.setTextColor(R.color.black)
-
-        binding.genreFiler.mystery.setCardBackgroundColor(R.color.white)
-        binding.genreFiler.nameMystery.setTextColor(R.color.black)
-
-        binding.genreFiler.scifi.setCardBackgroundColor(R.color.white)
-        binding.genreFiler.nameScifi.setTextColor(R.color.black)
-
-    }
-
-    private fun setSelectedGenre(genre: String) {
-        filterMovies(getGenreId(genre))
+    override fun onFilterClick(genre: FilterItem, pos: Int) {
+        setGenre(pos)
+        filterMovies(getGenreId(genre.genre))
+        sortMovies(selectedOrder as String)
     }
 
 }

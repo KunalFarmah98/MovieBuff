@@ -23,7 +23,9 @@
                 android:id="@+id/action_sort_date"
 
                 android:title="@string/by_release_date" />
-
+            <item
+                android:id="@+id/acton_sort_rating"
+                android:title="@string/by_rating" />
             <item
                 android:id="@+id/acton_sort_popularity"
                 android:title="@string/by_popularity" />
