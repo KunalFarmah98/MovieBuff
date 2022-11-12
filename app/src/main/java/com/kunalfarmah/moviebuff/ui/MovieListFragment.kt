@@ -1,12 +1,11 @@
 package com.kunalfarmah.moviebuff.ui
 
 import android.content.Context
-import android.content.Intent
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.*
+import android.view.View.OnClickListener
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.SearchView
@@ -16,34 +15,32 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.transition.*
 import com.kunalfarmah.moviebuff.R
+import com.kunalfarmah.moviebuff.adapter.MoviesAdapter
 import com.kunalfarmah.moviebuff.databinding.FragmentMovieListBinding
+import com.kunalfarmah.moviebuff.listener.MovieClickListener
 import com.kunalfarmah.moviebuff.listener.MovieListListener
 import com.kunalfarmah.moviebuff.room.MovieEntity
-import com.kunalfarmah.moviebuff.adapter.MoviesAdapter
-import com.kunalfarmah.moviebuff.listener.MovieClickListener
 import com.kunalfarmah.moviebuff.viewmodel.MoviesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+
 @AndroidEntryPoint
 @ExperimentalCoroutinesApi
-class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
+class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, OnClickListener {
 
     lateinit var binding: FragmentMovieListBinding
 
     companion object {
         var isGrid = true
-        final var TAG = "MovieListFragment"
+        var TAG = "MovieListFragment"
     }
 
     private val viewModel: MoviesViewModel by viewModels()
     private lateinit var mAdapter: MoviesAdapter
-
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-
-        super.onCreate(savedInstanceState)
-    }
+    private var movieList = ArrayList<MovieEntity>()
+    private var movieListCopy = ArrayList<MovieEntity>()
+    private var genreMap = HashMap<String, Int>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,10 +50,12 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
         binding = FragmentMovieListBinding.inflate(layoutInflater)
 
         fetchData()
+        populateGenres()
+        setFilterView()
 
         viewModel.movies.observe(viewLifecycleOwner) {
-            var movieList = viewModel.movies.value
             if (!movieList.isNullOrEmpty()) {
+                movieList = viewModel.movies.value as ArrayList<MovieEntity>
                 binding.shimmerFrameLayout.stopShimmerAnimation()
                 binding.shimmerFrameLayout.visibility = View.GONE
                 binding.noInternet.visibility = View.GONE
@@ -143,6 +142,8 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
     }
 
     override fun setView(list: ArrayList<MovieEntity>) {
+        movieList = list
+        movieListCopy = list
         binding.noInternet.visibility = View.GONE
         binding.shimmerFrameLayout.stopShimmerAnimation()
         binding.shimmerFrameLayout.visibility = View.GONE
@@ -202,6 +203,154 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
         } else {
             viewModel.getAllMovies()
         }
+    }
+
+    private fun populateGenres() {
+        genreMap["Action"] = 28
+        genreMap["Adventure"] = 12
+        genreMap["Animation"] = 16
+        genreMap["Comedy"] = 35
+        genreMap["Crime"] = 80
+        genreMap["Documentary"] = 99
+        genreMap["Drama"] = 18
+        genreMap["Family"] = 10751
+        genreMap["Fantasy"] = 14
+        genreMap["History"] = 36
+        genreMap["Horror"] = 27
+        genreMap["Music"] = 10402
+        genreMap["Mystery"] = 9648
+        genreMap["Romance"] = 10749
+        genreMap["Science Fiction"] = 878
+        genreMap["Thriller"] = 53
+        genreMap["War"] = 10752
+        genreMap["Western"] = 37
+    }
+
+
+    private fun setFilterView(){
+        binding.genreFiler.all.setCardBackgroundColor(R.color.colorPrimary)
+        binding.genreFiler.nameAll.setTextColor(R.color.white)
+
+        binding.genreFiler.all.setOnClickListener(this)
+        binding.genreFiler.action.setOnClickListener(this)
+        binding.genreFiler.adventure.setOnClickListener(this)
+        binding.genreFiler.comedy.setOnClickListener(this)
+        binding.genreFiler.drama.setOnClickListener(this)
+        binding.genreFiler.horror.setOnClickListener(this)
+        binding.genreFiler.thriller.setOnClickListener(this)
+        binding.genreFiler.mystery.setOnClickListener(this)
+        binding.genreFiler.scifi.setOnClickListener(this)
+    }
+
+    private fun getGenreId(genre: String) : Int {
+        return genreMap[genre] ?: 53
+    }
+
+    private fun filterMovies(genre: Int){
+        movieList = movieListCopy
+        if(movieList.isNullOrEmpty())
+            return
+        if(genre == 0) {
+            mAdapter = MoviesAdapter(context, movieList, this)
+            mAdapter.notifyDataSetChanged()
+            return
+        }
+        mAdapter.movieList = movieList.filter { movie ->
+            movie.genreIds.contains(genre.toString(), false)
+        }
+        mAdapter.notifyDataSetChanged()
+    }
+
+    override fun onClick(v: View?) {
+        when(v?.id){
+            R.id.all -> {
+                resetColors()
+                binding.genreFiler.all.setCardBackgroundColor(R.color.colorPrimary)
+                binding.genreFiler.nameAll.setTextColor(R.color.white)
+                filterMovies(0)
+            }
+            R.id.action -> {
+                resetColors()
+                binding.genreFiler.action.setCardBackgroundColor(R.color.colorPrimary)
+                binding.genreFiler.nameAction.setTextColor(R.color.white)
+                setSelectedGenre("action")
+            }
+            R.id.adventure -> {
+                resetColors()
+                binding.genreFiler.adventure.setCardBackgroundColor(R.color.colorPrimary)
+                binding.genreFiler.nameAdventure.setTextColor(R.color.white)
+                setSelectedGenre("adventure")
+            }
+            R.id.comedy -> {
+                resetColors()
+                binding.genreFiler.comedy.setCardBackgroundColor(R.color.colorPrimary)
+                binding.genreFiler.nameComedy.setTextColor(R.color.white)
+                setSelectedGenre("comedy")
+            }
+            R.id.drama -> {
+                resetColors()
+                binding.genreFiler.drama.setCardBackgroundColor(R.color.colorPrimary)
+                binding.genreFiler.nameDrama.setTextColor(R.color.white)
+                setSelectedGenre("drama")
+            }
+            R.id.horror -> {
+                resetColors()
+                binding.genreFiler.horror.setCardBackgroundColor(R.color.colorPrimary)
+                binding.genreFiler.nameHorror.setTextColor(R.color.white)
+                setSelectedGenre("horror")
+            }
+            R.id.thriller -> {
+                resetColors()
+                binding.genreFiler.thriller.setCardBackgroundColor(R.color.colorPrimary)
+                binding.genreFiler.nameThriller.setTextColor(R.color.white)
+                setSelectedGenre("thriller")
+            }
+            R.id.mystery -> {
+                resetColors()
+                binding.genreFiler.mystery.setCardBackgroundColor(R.color.colorPrimary)
+                binding.genreFiler.nameMystery.setTextColor(R.color.white)
+                setSelectedGenre("mystery")
+            }
+            R.id.scifi -> {
+                resetColors()
+                binding.genreFiler.scifi.setCardBackgroundColor(R.color.colorPrimary)
+                binding.genreFiler.nameScifi.setTextColor(R.color.white)
+                setSelectedGenre("scifi")
+            }
+
+        }
+    }
+
+
+    private fun resetColors(){
+        binding.genreFiler.action.setCardBackgroundColor(R.color.white)
+        binding.genreFiler.nameAction.setTextColor(R.color.black)
+
+        binding.genreFiler.adventure.setCardBackgroundColor(R.color.white)
+        binding.genreFiler.nameAdventure.setTextColor(R.color.black)
+
+        binding.genreFiler.comedy.setCardBackgroundColor(R.color.white)
+        binding.genreFiler.nameComedy.setTextColor(R.color.black)
+
+        binding.genreFiler.drama.setCardBackgroundColor(R.color.white)
+        binding.genreFiler.nameDrama.setTextColor(R.color.black)
+
+        binding.genreFiler.thriller.setCardBackgroundColor(R.color.white)
+        binding.genreFiler.nameThriller.setTextColor(R.color.black)
+
+        binding.genreFiler.horror.setCardBackgroundColor(R.color.white)
+        binding.genreFiler.nameHorror.setTextColor(R.color.black)
+
+        binding.genreFiler.mystery.setCardBackgroundColor(R.color.white)
+        binding.genreFiler.nameMystery.setTextColor(R.color.black)
+
+        binding.genreFiler.scifi.setCardBackgroundColor(R.color.white)
+        binding.genreFiler.nameScifi.setTextColor(R.color.black)
+
+    }
+
+    private fun setSelectedGenre(genre: String) {
+        filterMovies(getGenreId(genre))
     }
 
 }

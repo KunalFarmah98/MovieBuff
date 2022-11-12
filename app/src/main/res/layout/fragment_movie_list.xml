@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    android:id="@+id/main_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/white"
+    android:orientation="vertical"
     tools:context=".ui.MovieListFragment">
+
+    <include
+        android:id="@+id/genre_filer"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="5dp"
+        layout="@layout/genre_filter_list" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/movie_list"
@@ -15,12 +25,11 @@
         tools:listitem="@layout/list_item_movie_grid" />
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/no_internet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone">
 
@@ -80,4 +89,4 @@
 
     </com.facebook.shimmer.ShimmerFrameLayout>
 
-</RelativeLayout>
+</LinearLayout>
