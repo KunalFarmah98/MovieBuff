@@ -55,7 +55,7 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
 
         viewModel.movies.observe(viewLifecycleOwner) {
             var movieList = viewModel.movies.value
-            if (null != movieList && !movieList.isEmpty()) {
+            if (!movieList.isNullOrEmpty()) {
                 binding!!.shimmerFrameLayout.stopShimmerAnimation()
                 binding!!.shimmerFrameLayout.visibility = View.GONE
                 binding!!.noInternet.visibility = View.GONE
