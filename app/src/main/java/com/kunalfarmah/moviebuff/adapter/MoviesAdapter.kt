@@ -33,7 +33,7 @@ class MoviesAdapter(context: Context?, list: List<MovieEntity>, listener:MovieCl
     override fun onBindViewHolder(holder: MoviesViewHolder, position: Int) {
         var movie = movieList[position]
         holder.bind(movie)
-        holder.itemView.setOnClickListener { movieClick.onMovieClick(movie.id,holder.binding!!.image) }
+        holder.itemView.setOnClickListener { movieClick.onMovieClick(movie.id,holder.binding.image) }
     }
 
     override fun getItemCount(): Int {
@@ -41,22 +41,18 @@ class MoviesAdapter(context: Context?, list: List<MovieEntity>, listener:MovieCl
     }
 
     class MoviesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var binding: ListItemMovieGridBinding? = null
-
-        init {
-            binding = ListItemMovieGridBinding.bind(itemView)
-
-        }
-
+        var binding = ListItemMovieGridBinding.bind(itemView)
         companion object {
             private const val IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
         }
 
         fun bind(movie: MovieEntity) {
-            Glide.with(itemView.context).load(IMAGE_BASE_URL + movie.image)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(binding!!.image)
-            binding!!.title.text = movie.title
+            binding.image.let {
+                Glide.with(itemView.context).load(IMAGE_BASE_URL + movie.image)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(it)
+            }
+            binding.title.text = movie.title
         }
     }
 

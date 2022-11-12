@@ -1,10 +1,8 @@
 package com.kunalfarmah.moviebuff.ui
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.provider.SyncStateContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.kunalfarmah.moviebuff.adapter.ImageAdapter
 import com.kunalfarmah.moviebuff.databinding.FragmentMovieDetailBinding
-import com.kunalfarmah.moviebuff.util.Constants
 import com.kunalfarmah.moviebuff.viewmodel.MoviesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,7 +24,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 class MovieDetailFragment() : Fragment() {
 
     companion object {
-        final val TAG = "MoviesDetailFragment"
+        val TAG = "MoviesDetailFragment"
     }
     val viewModel: MoviesViewModel by viewModels()
     var binding: FragmentMovieDetailBinding? = null
@@ -39,7 +36,7 @@ class MovieDetailFragment() : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         movieId = viewModel.getSelectedMovie()
-        (activity as AppCompatActivity?)!!.supportActionBar!!.hide()
+        (activity as AppCompatActivity?)?.supportActionBar?.hide()
         binding = FragmentMovieDetailBinding.inflate(layoutInflater)
         fetchData()
         return binding?.root
@@ -47,48 +44,52 @@ class MovieDetailFragment() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.movieDetails.observe(viewLifecycleOwner, {
+        viewModel.movieDetails.observe(viewLifecycleOwner) {
             var details = viewModel.movieDetails.value
-            if(null==details){
+            if (null == details) {
                 setNoInternetView()
                 return@observe
             }
-            binding!!.noInternet.visibility = View.GONE
-            binding!!.mainLayout.visibility = View.VISIBLE
-            binding!!.title.text = details?.title
-            binding!!.rating.text = String.format("Rating: %s", details.voteAverage.toString())
-            binding!!.language.text = String.format(
+            binding?.noInternet?.visibility = View.GONE
+            binding?.mainLayout?.visibility = View.VISIBLE
+            binding?.title?.text = details.title
+            binding?.rating?.text = String.format("Rating: %s", details.voteAverage.toString())
+            binding?.language?.text = String.format(
                 "Original Language: %s",
                 details.originalLanguage
             )
-            binding!!.releaseDate.text = String.format("Released on: %s", details.releaseDate)
-            binding!!.runtime.text = String.format("Runtime: %s Min", details.runtime)
-            Glide.with(requireContext()).load(IMAGE_BASE_URL + details.backdropPath)
-                .into(binding!!.banner)
-            Glide.with(requireContext()).load(IMAGE_BASE_URL + details.posterPath)
-                .into(binding!!.image)
+            binding?.releaseDate?.text = String.format("Released on: %s", details.releaseDate)
+            binding?.runtime?.text = String.format("Runtime: %s Min", details.runtime)
+            binding?.banner?.let { view ->
+                Glide.with(requireContext()).load(IMAGE_BASE_URL + details.backdropPath)
+                    .into(view)
+            }
+            binding?.image?.let { view ->
+                Glide.with(requireContext()).load(IMAGE_BASE_URL + details.posterPath)
+                    .into(view)
+            }
             binding?.overview?.text = details.overview
-        })
+        }
 
-        viewModel.movieImages.observe(viewLifecycleOwner, {
+        viewModel.movieImages.observe(viewLifecycleOwner) {
             if (viewModel.movieImages.value.isNullOrEmpty()) {
-                binding!!.imagesLayout.visibility = View.GONE
+                binding?.imagesLayout?.visibility = View.GONE
                 return@observe
             }
-            binding!!.imagesRecycler.setHasFixedSize(true)
-            binding!!.imagesRecycler.setItemViewCacheSize(10)
-            binding!!.imagesRecycler.layoutManager = LinearLayoutManager(
+            binding?.imagesRecycler?.setHasFixedSize(true)
+            binding?.imagesRecycler?.setItemViewCacheSize(10)
+            binding?.imagesRecycler?.layoutManager = LinearLayoutManager(
                 context,
                 RecyclerView.HORIZONTAL,
                 false
             )
             imageAdapter = ImageAdapter(requireContext(), viewModel.movieImages.value)
-            binding!!.imagesRecycler.adapter = imageAdapter
-        })
+            binding?.imagesRecycler?.adapter = imageAdapter
+        }
 
-        viewModel.movieReviews.observe(viewLifecycleOwner, {
+        viewModel.movieReviews.observe(viewLifecycleOwner) {
             if (viewModel.movieReviews.value.isNullOrEmpty()) {
-                binding!!.reviewsLayout.visibility = View.GONE
+                binding?.reviewsLayout?.visibility = View.GONE
                 return@observe
             }
             var review = ""
@@ -96,21 +97,21 @@ class MovieDetailFragment() : Fragment() {
                 review = review + reviews.content + "\n\n"
             }
             binding?.reviews?.text = review
-        })
+        }
 
         binding?.back?.setOnClickListener {
-            (activity as AppCompatActivity?)!!.supportActionBar!!.show()
+            (activity as AppCompatActivity?)?.supportActionBar?.show()
             requireActivity().onBackPressed() }
 
-        binding!!.retry.setOnClickListener { fetchData() }
+        binding?.retry?.setOnClickListener { fetchData() }
     }
 
     fun setNoInternetView() {
-        binding!!.mainLayout.visibility = View.GONE
-        binding!!.noInternet.visibility = View.VISIBLE
+        binding?.mainLayout?.visibility = View.GONE
+        binding?.noInternet?.visibility = View.VISIBLE
     }
 
-    fun fetchData(){
+    private fun fetchData(){
         if(isNetworkAvailable(requireContext())) {
             viewModel.getMovieDetail(movieId.toString())
             viewModel.getMovieImages(movieId.toString())
@@ -121,7 +122,7 @@ class MovieDetailFragment() : Fragment() {
         }
     }
 
-    fun isNetworkAvailable(context: Context): Boolean {
+    private fun isNetworkAvailable(context: Context): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetworkInfo = connectivityManager.activeNetworkInfo

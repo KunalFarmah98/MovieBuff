@@ -85,7 +85,7 @@ constructor(
         var posters:List<PostersItem?>?=null
         viewModelScope.launch {
             var response = moviesRepository.getMovieImages(id)
-            if(null!=response && null!=response.posters)
+            if(response?.posters != null)
                 posters = response.posters
         }.invokeOnCompletion { movieImages.value = posters as List<PostersItem>? }
     }
@@ -94,7 +94,7 @@ constructor(
         sPref?.edit()?.putInt(Constants.MOVIE_ID,id)?.apply()
     }
 
-    fun getSelectedMovie(): String?{
+    fun getSelectedMovie(): String{
         return sPref?.getInt(Constants.MOVIE_ID,0).toString()
     }
 

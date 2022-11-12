@@ -28,7 +28,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalCoroutinesApi
 class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
 
-    var binding: FragmentMovieListBinding? = null
+    lateinit var binding: FragmentMovieListBinding
 
     companion object {
         var isGrid = true
@@ -47,7 +47,7 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         setHasOptionsMenu(true)
         binding = FragmentMovieListBinding.inflate(layoutInflater)
 
@@ -56,30 +56,30 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
         viewModel.movies.observe(viewLifecycleOwner) {
             var movieList = viewModel.movies.value
             if (!movieList.isNullOrEmpty()) {
-                binding!!.shimmerFrameLayout.stopShimmerAnimation()
-                binding!!.shimmerFrameLayout.visibility = View.GONE
-                binding!!.noInternet.visibility = View.GONE
+                binding.shimmerFrameLayout.stopShimmerAnimation()
+                binding.shimmerFrameLayout.visibility = View.GONE
+                binding.noInternet.visibility = View.GONE
 
                 mAdapter = MoviesAdapter(context, movieList, this)
                 if (isGrid)
-                    binding!!.movieList.layoutManager = GridLayoutManager(context, 2)
+                    binding.movieList.layoutManager = GridLayoutManager(context, 2)
                 else
-                    binding!!.movieList.layoutManager = GridLayoutManager(context, 1)
+                    binding.movieList.layoutManager = GridLayoutManager(context, 1)
 
-                binding!!.movieList.setHasFixedSize(true)
-                binding!!.movieList.setItemViewCacheSize(10)
-                binding!!.movieList.adapter = mAdapter
-                binding!!.movieList.visibility = View.VISIBLE
+                binding.movieList.setHasFixedSize(true)
+                binding.movieList.setItemViewCacheSize(10)
+                binding.movieList.adapter = mAdapter
+                binding.movieList.visibility = View.VISIBLE
             } else {
                 setNoInternetView()
             }
         }
 
-        binding!!.retry.setOnClickListener { fetchData() }
-        return binding?.root
+        binding.retry.setOnClickListener { fetchData() }
+        return binding.root
     }
 
-
+    @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menu.clear()
         inflater.inflate(R.menu.movies, menu)
@@ -103,7 +103,7 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
         })
 
         searchView.findViewById<ImageView>(R.id.search_close_btn)?.setOnClickListener {
-            var et = it.findViewById<EditText>(R.id.search_src_text);
+            val et = it.findViewById<EditText>(R.id.search_src_text);
             et.setText("");
             searchView.setQuery("", false);
             searchView.onActionViewCollapsed()
@@ -114,6 +114,7 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
     }
 
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
         when (id) {
@@ -121,7 +122,7 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
                 isGrid = !isGrid
                 var span = 1
                 if (isGrid) ++span
-                binding?.movieList?.layoutManager = GridLayoutManager(context, span)
+                binding.movieList?.layoutManager = GridLayoutManager(context, span)
             }
             R.id.action_about -> {
                 var intent = Intent(Intent.ACTION_VIEW)
@@ -140,24 +141,24 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
     }
 
     override fun setView(list: ArrayList<MovieEntity>) {
-        binding!!.noInternet.visibility = View.GONE
-        binding!!.shimmerFrameLayout.stopShimmerAnimation()
-        binding!!.shimmerFrameLayout.visibility = View.GONE
+        binding.noInternet.visibility = View.GONE
+        binding.shimmerFrameLayout.stopShimmerAnimation()
+        binding.shimmerFrameLayout.visibility = View.GONE
         mAdapter = MoviesAdapter(context, list, this)
         if (isGrid)
-            binding!!.movieList.layoutManager = GridLayoutManager(context, 2)
+            binding.movieList.layoutManager = GridLayoutManager(context, 2)
         else
-            binding!!.movieList.layoutManager = GridLayoutManager(context, 1)
-        binding!!.movieList.setHasFixedSize(true)
-        binding!!.movieList.setItemViewCacheSize(10)
-        binding!!.movieList.adapter = mAdapter
-        binding!!.movieList.visibility = View.VISIBLE
+            binding.movieList.layoutManager = GridLayoutManager(context, 1)
+        binding.movieList.setHasFixedSize(true)
+        binding.movieList.setItemViewCacheSize(10)
+        binding.movieList.adapter = mAdapter
+        binding.movieList.visibility = View.VISIBLE
     }
 
     override fun setNoInternetView() {
-        binding!!.shimmerFrameLayout.visibility = View.GONE
-        binding!!.movieList.visibility = View.GONE
-        binding!!.noInternet.visibility = View.VISIBLE
+        binding.shimmerFrameLayout.visibility = View.GONE
+        binding.movieList.visibility = View.GONE
+        binding.noInternet.visibility = View.VISIBLE
     }
 
     override fun onMovieClick(id: Int, image: ImageView) {
@@ -192,8 +193,8 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
     }
 
     fun fetchData() {
-        binding!!.shimmerFrameLayout.visibility = View.VISIBLE
-        binding!!.shimmerFrameLayout.startShimmerAnimation()
+        binding.shimmerFrameLayout.visibility = View.VISIBLE
+        binding.shimmerFrameLayout.startShimmerAnimation()
         if (isNetworkAvailable(requireContext())) {
             viewModel.fetchAllMovies(this)
         } else {

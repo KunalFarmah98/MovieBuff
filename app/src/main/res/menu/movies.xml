@@ -8,7 +8,7 @@
         app:showAsAction="never" />
 
     <item android:id="@+id/switchView"
-        android:icon="@drawable/baseline_reorder_white_24dp"
+        android:icon="@drawable/baseline_view_day_24"
         app:showAsAction="always"
         android:title="" />
 

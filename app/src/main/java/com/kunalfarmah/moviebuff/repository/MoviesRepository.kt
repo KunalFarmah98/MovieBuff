@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.http.Query
 
 class MoviesRepository
 constructor(
@@ -20,7 +19,7 @@ constructor(
     private val networkMapper: NetworkMapper
 ) {
     fun fetchMovies(listener: MovieListListener) {
-        var movieList: ArrayList<MovieEntity>? = null
+        var movieList: ArrayList<MovieEntity>?
 
         movieRetrofit.getMovies(Constants.API_KEY, "US").enqueue(object : Callback<MoviesResponse> {
             override fun onResponse(
@@ -28,14 +27,14 @@ constructor(
                 response: Response<MoviesResponse>
             ) {
                 if (response.isSuccessful && null != response.body()) {
-                    movieList = ArrayList<MovieEntity>()
-                    var movies = response.body()!!.results
-                    for (movie in movies!!)
+                    movieList = ArrayList()
+                    var movies = response.body()?.results ?: ArrayList()
+                    for (movie in movies)
                         (movieList as ArrayList<MovieEntity>).add(networkMapper.mapToEntity(movie))
 
                     listener.setView(movieList!!)
                     CoroutineScope(Dispatchers.IO).launch {
-                        for (movie in movies!!) {
+                        for (movie in movies) {
                             movieDao.insert(networkMapper.mapToEntity(movie))
                         }
                     }
@@ -50,7 +49,7 @@ constructor(
     }
 
     fun searchMovies(listener: MovieListListener, query: String) {
-        var movieList: ArrayList<MovieEntity>? = null
+        var movieList: ArrayList<MovieEntity>?
 
         movieRetrofit.searchMovies(Constants.API_KEY, query).enqueue(object : Callback<MoviesResponse> {
             override fun onResponse(
@@ -58,8 +57,8 @@ constructor(
                 response: Response<MoviesResponse>
             ) {
                 if (response.isSuccessful && null != response.body()) {
-                    movieList = ArrayList<MovieEntity>()
-                    var movies = response.body()!!.results
+                    movieList = ArrayList()
+                    var movies = response.body()?.results
                     for (movie in movies!!)
                         (movieList as ArrayList<MovieEntity>).add(networkMapper.mapToEntity(movie))
                     listener.setView(movieList!!)

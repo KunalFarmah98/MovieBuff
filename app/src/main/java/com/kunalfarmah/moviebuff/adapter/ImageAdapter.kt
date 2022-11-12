@@ -22,7 +22,7 @@ class ImageAdapter(context: Context, images: List<PostersItem>?) : RecyclerView.
     }
 
     override fun getItemCount(): Int {
-        return list!!.size
+        return list?.size ?: 0
     }
 
     class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -36,8 +36,10 @@ class ImageAdapter(context: Context, images: List<PostersItem>?) : RecyclerView.
         }
 
         fun bind(postersItem: PostersItem){
-            Glide.with(itemView.context).load(IMAGE_BASE_URL+postersItem.filePath).diskCacheStrategy(
-                DiskCacheStrategy.ALL).into(binding!!.imageView)
+            binding?.imageView?.let {
+                Glide.with(itemView.context).load(IMAGE_BASE_URL+postersItem.filePath).diskCacheStrategy(
+                    DiskCacheStrategy.ALL).into(it)
+            }
         }
     }
 }

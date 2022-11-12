@@ -25,15 +25,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @AndroidEntryPoint
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity() {
-
-    private val viewModel:MoviesViewModel by viewModels()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-        supportActionBar!!.title = "Popular Movies"
+        supportActionBar?.title = "Popular Movies"
 
 
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
@@ -83,7 +80,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        supportActionBar!!.show()
+        supportActionBar?.show()
         if(null!=supportFragmentManager.findFragmentByTag(MovieDetailFragment.TAG))
             supportFragmentManager.popBackStack()
         else
