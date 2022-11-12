@@ -2,11 +2,6 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/action_about"
-        android:title="@string/action_about"
-        android:orderInCategory="100"
-        app:showAsAction="never" />
-
     <item android:id="@+id/switchView"
         android:icon="@drawable/baseline_view_day_24"
         app:showAsAction="always"
@@ -17,4 +12,21 @@
         app:showAsAction="always"
         app:actionViewClass="android.widget.SearchView"
         android:title="" />
+
+    <item android:id="@+id/action_sort"
+        android:title="@string/action_sort"
+        android:orderInCategory="100"
+        android:icon="@drawable/baseline_sort_24"
+        app:showAsAction="always" >
+        <menu>
+            <item
+                android:id="@+id/action_sort_date"
+
+                android:title="@string/by_release_date" />
+
+            <item
+                android:id="@+id/acton_sort_popularity"
+                android:title="@string/by_popularity" />
+        </menu>
+    </item>
 </menu>

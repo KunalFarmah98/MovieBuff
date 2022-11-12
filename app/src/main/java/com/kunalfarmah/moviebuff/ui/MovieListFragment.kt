@@ -10,6 +10,7 @@ import android.view.*
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.SearchView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
@@ -122,18 +123,19 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
                 isGrid = !isGrid
                 var span = 1
                 if (isGrid) ++span
-                binding.movieList?.layoutManager = GridLayoutManager(context, span)
+                binding.movieList.layoutManager = GridLayoutManager(context, span)
             }
-            R.id.action_about -> {
-                var intent = Intent(Intent.ACTION_VIEW)
-                intent.data = Uri.parse("https://kunal-farmah.jimdosite.com")
-                startActivity(intent)
+            R.id.acton_sort_popularity -> {
+                Toast.makeText(activity, "popularity", Toast.LENGTH_SHORT).show()
+            }
+            R.id.action_sort_date -> {
+                Toast.makeText(activity, "date", Toast.LENGTH_SHORT).show()
             }
         }
         return super.onOptionsItemSelected(item)
     }
 
-    fun isNetworkAvailable(context: Context): Boolean {
+    private fun isNetworkAvailable(context: Context): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetworkInfo = connectivityManager.activeNetworkInfo
@@ -192,7 +194,7 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener {
         }
     }
 
-    fun fetchData() {
+    private fun fetchData() {
         binding.shimmerFrameLayout.visibility = View.VISIBLE
         binding.shimmerFrameLayout.startShimmerAnimation()
         if (isNetworkAvailable(requireContext())) {
