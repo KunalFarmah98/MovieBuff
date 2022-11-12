@@ -11,7 +11,6 @@ import com.kunalfarmah.moviebuff.databinding.ItemImageBinding
 import com.kunalfarmah.moviebuff.retrofit.PostersItem
 
 class ImageAdapter(context: Context, images: List<PostersItem>?) : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
-    var mContext=context
     var list = images
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         return ImageViewHolder(ItemImageBinding.inflate(LayoutInflater.from(parent.context),parent,false).root)
