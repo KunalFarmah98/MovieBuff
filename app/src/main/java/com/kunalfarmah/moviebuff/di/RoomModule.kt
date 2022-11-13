@@ -30,6 +30,6 @@ object RoomModule {
     @Singleton
     @Provides
     fun provideMovieDAO(movieDatabase: MovieDatabase): MovieDao {
-        return movieDatabase.blogDao()
+        return movieDatabase.movieDao()
     }
 }
