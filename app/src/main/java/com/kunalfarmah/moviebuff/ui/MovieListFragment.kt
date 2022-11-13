@@ -141,27 +141,29 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
         when (id) {
             R.id.switchView -> {
                 if(display == Constants.Display.GRID){
+                    Toast.makeText(activity, "Switching to cards", Toast.LENGTH_SHORT).show()
                     PreferenceManager.putValue(Constants.DISPLAY, Constants.Display.CARDS)
                     setLayout(Constants.Display.CARDS)
                 }
                 else{
+                    Toast.makeText(activity, "Switching to grid", Toast.LENGTH_SHORT).show()
                     PreferenceManager.putValue(Constants.DISPLAY, Constants.Display.GRID)
                     setLayout(Constants.Display.GRID)
                 }
             }
             R.id.acton_sort_popularity -> {
                 PreferenceManager.putValue(Constants.SORT_ORDER, Constants.SortOrder.POPULAIRTY)
-                Toast.makeText(activity, "popularity", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, "Sorting by popularity", Toast.LENGTH_SHORT).show()
                 sortMovies(Constants.SortOrder.POPULAIRTY)
             }
             R.id.action_sort_date -> {
                 PreferenceManager.putValue(Constants.SORT_ORDER, Constants.SortOrder.RELEASE_DATE)
-                Toast.makeText(activity, "date", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, "Sorting by date", Toast.LENGTH_SHORT).show()
                 sortMovies(Constants.SortOrder.RELEASE_DATE)
             }
             R.id.acton_sort_rating -> {
                 PreferenceManager.putValue(Constants.SORT_ORDER, Constants.SortOrder.RATING)
-                Toast.makeText(activity, "date", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, "Sorting by rating", Toast.LENGTH_SHORT).show()
                 sortMovies(Constants.SortOrder.RATING)
             }
         }
