@@ -11,12 +11,18 @@ class Constants {
         val SELECTED_FILTER = "SelectedFilter"
         val SORT_ORDER = "SortOrder"
         val MOVIES = "Movies"
+        val DISPLAY = "Display"
     }
 
      object SortOrder {
          val POPULAIRTY = "Popularity"
          val RELEASE_DATE = "ReleaseData"
          val RATING = "Rating"
+    }
+
+    object Display {
+        val GRID = "Grid"
+        val CARDS = "Cards"
     }
 
 }

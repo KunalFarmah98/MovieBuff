@@ -7,10 +7,10 @@ import retrofit2.http.*
 interface MovieRetrofit {
 
     @GET("movie/popular")
-    fun getMovies(@Query("api_key") apiKey:String, @Query("region") region:String): Call<MoviesResponse>
+    suspend fun getMovies(@Query("api_key") apiKey:String, @Query("region") region:String): MoviesResponse
 
     @GET("search/movie")
-    fun searchMovies(@Query("api_key") apiKey:String, @Query("query") query:String): Call<MoviesResponse>
+    suspend fun searchMovies(@Query("api_key") apiKey:String, @Query("query") query:String): MoviesResponse
 
     @GET("movie/{movieId}")
     suspend fun getDetails(@Path("movieId") id:String, @Query("api_key") apiKey:String): MovieDetailsResponse

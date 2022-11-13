@@ -37,12 +37,11 @@ import timber.log.Timber
 
 @AndroidEntryPoint
 @ExperimentalCoroutinesApi
-class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, FilterClickListener {
+class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener {
 
     lateinit var binding: FragmentMovieListBinding
 
     companion object {
-        var isGrid = true
         var TAG = "MovieListFragment"
     }
 
@@ -55,6 +54,7 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, F
     private var genreMap = HashMap<String, Int>()
     private var selectedGenre = PreferenceManager.getValue(Constants.SELECTED_FILTER, 0)
     private var selectedOrder = PreferenceManager.getValue(Constants.SORT_ORDER, "")
+    private var display = PreferenceManager.getValue(Constants.DISPLAY, Constants.Display.GRID)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -72,6 +72,9 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, F
                    else if (key.equals(Constants.SORT_ORDER)){
                        selectedOrder = sharedPreferences.getString(key, "")
                    }
+                   else if(key.equals(Constants.DISPLAY)){
+                       display = sharedPreferences.getString(key, Constants.Display.GRID)
+                   }
                }
                Timber.d(TAG, "SharedPreferences key: $key changed")
            }
@@ -81,22 +84,8 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, F
         setFilterView()
 
         viewModel.movies.observe(viewLifecycleOwner) {
-            if (!movieList.isNullOrEmpty()) {
-                movieList = viewModel.movies.value as ArrayList<Movie>
-                binding.shimmerFrameLayout.stopShimmerAnimation()
-                binding.shimmerFrameLayout.visibility = View.GONE
-                binding.noInternet.visibility = View.GONE
-
-                mAdapter = MoviesAdapter(context, movieList, this)
-                if (isGrid)
-                    binding.movieList.layoutManager = GridLayoutManager(context, 2)
-                else
-                    binding.movieList.layoutManager = GridLayoutManager(context, 1)
-
-                binding.movieList.setHasFixedSize(true)
-                binding.movieList.setItemViewCacheSize(10)
-                binding.movieList.adapter = mAdapter
-                binding.movieList.visibility = View.VISIBLE
+            if (!it.isNullOrEmpty()) {
+                setViews(it as ArrayList<Movie>)
             } else {
                 setNoInternetView()
             }
@@ -122,11 +111,16 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, F
             }
 
             override fun onQueryTextSubmit(query: String): Boolean {
-                viewModel.searchAllMovies(this@MovieListFragment, query)
+                viewModel.searchAllMovies(query)
                 return true
             }
 
 
+        })
+
+        searchView.setOnCloseListener(SearchView.OnCloseListener {
+            fetchData()
+            return@OnCloseListener false
         })
 
         searchView.findViewById<ImageView>(R.id.search_close_btn)?.setOnClickListener {
@@ -146,10 +140,17 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, F
         val id = item.itemId
         when (id) {
             R.id.switchView -> {
-                isGrid = !isGrid
-                var span = 1
-                if (isGrid) ++span
-                binding.movieList.layoutManager = GridLayoutManager(context, span)
+                if(display == Constants.Display.GRID){
+                    PreferenceManager.putValue(Constants.DISPLAY, Constants.Display.CARDS)
+                }
+                else{
+                    PreferenceManager.putValue(Constants.DISPLAY, Constants.Display.GRID)
+                }
+                if (display == Constants.Display.GRID)
+                    binding.movieList.layoutManager = GridLayoutManager(context, 2)
+                else
+                    binding.movieList.layoutManager = LinearLayoutManager(context)
+
             }
             R.id.acton_sort_popularity -> {
                 PreferenceManager.putValue(Constants.SORT_ORDER, Constants.SortOrder.POPULAIRTY)
@@ -177,17 +178,21 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, F
         return activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
 
-    override fun setView(list: ArrayList<Movie>) {
+    private fun setViews(list: ArrayList<Movie>){
+        if(list.isEmpty()){
+            setNoInternetView()
+            return
+        }
         movieList = list
         movieListCopy = list
         binding.noInternet.visibility = View.GONE
         binding.shimmerFrameLayout.stopShimmerAnimation()
         binding.shimmerFrameLayout.visibility = View.GONE
         mAdapter = MoviesAdapter(context, list, this)
-        if (isGrid)
+        if (display == Constants.Display.GRID)
             binding.movieList.layoutManager = GridLayoutManager(context, 2)
         else
-            binding.movieList.layoutManager = GridLayoutManager(context, 1)
+            binding.movieList.layoutManager = LinearLayoutManager(context)
         binding.movieList.setHasFixedSize(true)
         binding.movieList.setItemViewCacheSize(10)
         binding.movieList.adapter = mAdapter
@@ -199,10 +204,8 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, F
 
         //sorting based on user preferences
         sortMovies(selectedOrder as String)
-
     }
-
-    override fun setNoInternetView() {
+    private fun setNoInternetView() {
         binding.shimmerFrameLayout.visibility = View.GONE
         binding.movieList.visibility = View.GONE
         binding.noInternet.visibility = View.VISIBLE
@@ -243,7 +246,7 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, F
         binding.shimmerFrameLayout.visibility = View.VISIBLE
         binding.shimmerFrameLayout.startShimmerAnimation()
         if (isNetworkAvailable(requireContext())) {
-            viewModel.fetchAllMovies(this)
+            viewModel.fetchAllMovies()
         } else {
             viewModel.getAllMovies()
         }

@@ -43,12 +43,16 @@ class MoviesViewModel
 
 
 
-    fun fetchAllMovies(listener: MovieListListener){
-        moviesRepository.fetchMovies(listener)
+    fun fetchAllMovies() {
+        viewModelScope.launch {
+            movies.value = moviesRepository.fetchMovies()
+        }
     }
 
-    fun searchAllMovies(listener: MovieListListener,  query:String){
-        moviesRepository.searchMovies(listener, query)
+    fun searchAllMovies(query:String){
+        viewModelScope.launch {
+            movies.value = moviesRepository.searchMovies(query)
+        }
     }
 
 
@@ -57,28 +61,28 @@ class MoviesViewModel
     }
 
     fun getMovieDetail(id:String){
-        var details:MovieDetailsResponse?=null
         viewModelScope.launch {
-            details = moviesRepository.getMovieDetails(id)
-        }.invokeOnCompletion { movieDetails.value = details }
+            val response = moviesRepository.getMovieDetails(id)
+            if(response != null){
+                movieDetails.value = response
+            }
+        }
     }
 
     fun getMovieReviews(id:String){
-        var reviews:List<ReviewItem?>?=null
         viewModelScope.launch {
-            var response = moviesRepository.getMovieReviews(id)
+            val response = moviesRepository.getMovieReviews(id)
             if(response?.results != null)
-                reviews = response.results
-        }.invokeOnCompletion { movieReviews.value = reviews as List<ReviewItem>? }
+                movieReviews.value  = response.results as? List<ReviewItem>
+        }
     }
 
     fun getMovieImages(id:String){
-        var posters:List<PostersItem?>?=null
         viewModelScope.launch {
-            var response = moviesRepository.getMovieImages(id)
+            val response = moviesRepository.getMovieImages(id)
             if(response?.posters != null)
-                posters = response.posters
-        }.invokeOnCompletion { movieImages.value = posters as List<PostersItem>? }
+                movieImages.value = response.posters as List<PostersItem>?
+        }
     }
 
     fun setSelectedMovie(id:Int){

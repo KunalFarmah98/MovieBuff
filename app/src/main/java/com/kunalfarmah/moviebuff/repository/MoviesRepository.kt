@@ -2,24 +2,38 @@ package com.kunalfarmah.moviebuff.repository
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.kunalfarmah.moviebuff.listener.MovieListListener
 import com.kunalfarmah.moviebuff.model.Movie
 import com.kunalfarmah.moviebuff.preferences.PreferenceManager
 import com.kunalfarmah.moviebuff.util.Constants
 import com.kunalfarmah.moviebuff.retrofit.*
 import com.kunalfarmah.moviebuff.util.Util
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class MoviesRepository
 constructor(
     private val movieRetrofit: MovieRetrofit,
 ) {
-    fun fetchMovies(listener: MovieListListener) {
+    suspend fun fetchMovies() : ArrayList<Movie> {
         var movieList: ArrayList<Movie>?
 
-        movieRetrofit.getMovies(Constants.API_KEY, "US").enqueue(object : Callback<MoviesResponse> {
+        return if(Util.isNetworkAvailable()) {
+            val response = movieRetrofit.getMovies(Constants.API_KEY, "US")
+            movieList = ArrayList()
+            var movies = response.results ?: ArrayList()
+            for (movie in movies)
+                movieList.add(mapToObject(movie))
+            PreferenceManager.putValue(Constants.MOVIES, Gson().toJson(movieList))
+            movieList
+        } else{
+            val type =  object : TypeToken<List<Movie>>() {}.type
+            val movies = PreferenceManager.getValue(Constants.MOVIES, "") as String
+            if(movies.isNotEmpty())
+                Gson().fromJson(movies, type) as ArrayList<Movie>
+            else
+                ArrayList()
+        }
+
+
+        /*movieRetrofit.getMovies(Constants.API_KEY, "US").enqueue(object : Callback<MoviesResponse> {
             override fun onResponse(
                 call: Call<MoviesResponse>,
                 response: Response<MoviesResponse>
@@ -31,6 +45,7 @@ constructor(
                         (movieList as ArrayList<Movie>).add(mapToObject(movie))
                     listener.setView(movieList!!)
                     PreferenceManager.putValue(Constants.MOVIES, Gson().toJson(movieList))
+                    return movieList
                 }
             }
 
@@ -38,11 +53,10 @@ constructor(
                 listener.setNoInternetView()
             }
 
-        })
+        })*/
     }
 
-    fun searchMovies(listener: MovieListListener, query: String) {
-        var movieList: ArrayList<Movie>?
+/*    fun searchMovies(listener: MovieListListener, query: String){
 
         movieRetrofit.searchMovies(Constants.API_KEY, query).enqueue(object : Callback<MoviesResponse> {
             override fun onResponse(
@@ -63,12 +77,26 @@ constructor(
             }
 
         })
+    }*/
+
+    suspend fun searchMovies(query: String): ArrayList<Movie> {
+        var movieList: ArrayList<Movie>?
+
+        return if (Util.isNetworkAvailable()) {
+            val response = movieRetrofit.searchMovies(Constants.API_KEY, query)
+            movieList = ArrayList()
+            var movies = response.results
+            for (movie in movies!!)
+                movieList.add(mapToObject(movie))
+            movieList
+        } else
+            ArrayList()
     }
 
     fun getMovies(): List<Movie> {
         var type =  object : TypeToken<List<Movie>>() {}.type
         val movies = PreferenceManager.getValue(Constants.MOVIES, "") as String
-        return Gson().fromJson(movies, type)
+        return Gson().fromJson(movies, type) as List<Movie>
     }
 
     suspend fun getMovieDetails(id: String): MovieDetailsResponse? {
@@ -80,7 +108,7 @@ constructor(
             val type =  object : TypeToken<MovieDetailsResponse>() {}.type
             val cache = PreferenceManager.getValue(id + "_details", "") as String
             if(cache.isNotEmpty())
-                 Gson().fromJson(cache, type)
+                 Gson().fromJson(cache, type) as MovieDetailsResponse
             else
                 null
         }
@@ -96,7 +124,7 @@ constructor(
             val type =  object : TypeToken<ImageResponse>() {}.type
             val cache = PreferenceManager.getValue(id + "_images", "") as String
             if(cache.isNotEmpty())
-                 Gson().fromJson(cache, type)
+                 Gson().fromJson(cache, type) as ImageResponse
             else
                 null
         }
@@ -112,13 +140,13 @@ constructor(
             val type =  object : TypeToken<ReviewResponse>() {}.type
             val cache = PreferenceManager.getValue(id + "_reviews", "") as String
            if(cache.isNotEmpty())
-                Gson().fromJson(cache, type)
+                Gson().fromJson(cache, type) as ReviewResponse
             else
                 null
         }
     }
 
-    fun mapToObject(response: Movies): Movie {
+    private fun mapToObject(response: Movies): Movie {
         return Movie(
             response.id as Int,
             response.title ?: "",
