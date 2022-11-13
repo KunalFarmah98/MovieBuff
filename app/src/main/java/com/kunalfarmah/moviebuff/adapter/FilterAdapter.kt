@@ -14,7 +14,7 @@ import com.kunalfarmah.moviebuff.listener.FilterClickListener
 import com.kunalfarmah.moviebuff.listener.MovieClickListener
 import com.kunalfarmah.moviebuff.model.FilterItem
 import com.kunalfarmah.moviebuff.preferences.PreferenceManager
-import com.kunalfarmah.moviebuff.room.MovieEntity
+import com.kunalfarmah.moviebuff.model.Movie
 import com.kunalfarmah.moviebuff.util.Constants
 
 class FilterAdapter(val context: Context?, var list: List<FilterItem>, private val listener: FilterClickListener) :

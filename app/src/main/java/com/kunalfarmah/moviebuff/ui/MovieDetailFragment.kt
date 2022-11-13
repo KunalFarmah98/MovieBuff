@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.kunalfarmah.moviebuff.adapter.ImageAdapter
 import com.kunalfarmah.moviebuff.databinding.FragmentMovieDetailBinding
+import com.kunalfarmah.moviebuff.util.Util
 import com.kunalfarmah.moviebuff.viewmodel.MoviesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -112,21 +113,9 @@ class MovieDetailFragment() : Fragment() {
     }
 
     private fun fetchData(){
-        if(isNetworkAvailable(requireContext())) {
-            viewModel.getMovieDetail(movieId.toString())
-            viewModel.getMovieImages(movieId.toString())
-            viewModel.getMovieReviews(movieId.toString())
-        }
-        else{
-            setNoInternetView()
-        }
-    }
-
-    private fun isNetworkAvailable(context: Context): Boolean {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetworkInfo = connectivityManager.activeNetworkInfo
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected
+        viewModel.getMovieDetail(movieId.toString())
+        viewModel.getMovieImages(movieId.toString())
+        viewModel.getMovieReviews(movieId.toString())
     }
 
 }

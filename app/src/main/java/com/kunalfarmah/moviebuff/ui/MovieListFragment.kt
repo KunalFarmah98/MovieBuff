@@ -27,7 +27,7 @@ import com.kunalfarmah.moviebuff.listener.MovieClickListener
 import com.kunalfarmah.moviebuff.listener.MovieListListener
 import com.kunalfarmah.moviebuff.model.FilterItem
 import com.kunalfarmah.moviebuff.preferences.PreferenceManager
-import com.kunalfarmah.moviebuff.room.MovieEntity
+import com.kunalfarmah.moviebuff.model.Movie
 import com.kunalfarmah.moviebuff.util.Constants
 import com.kunalfarmah.moviebuff.viewmodel.MoviesViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -49,8 +49,8 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, F
     private val viewModel: MoviesViewModel by viewModels()
     private lateinit var mAdapter: MoviesAdapter
     private lateinit var filterAdapter: FilterAdapter
-    private var movieList = ArrayList<MovieEntity>()
-    private var movieListCopy = ArrayList<MovieEntity>()
+    private var movieList = ArrayList<Movie>()
+    private var movieListCopy = ArrayList<Movie>()
     private var genreList = ArrayList<FilterItem>()
     private var genreMap = HashMap<String, Int>()
     private var selectedGenre = PreferenceManager.getValue(Constants.SELECTED_FILTER, 0)
@@ -82,7 +82,7 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, F
 
         viewModel.movies.observe(viewLifecycleOwner) {
             if (!movieList.isNullOrEmpty()) {
-                movieList = viewModel.movies.value as ArrayList<MovieEntity>
+                movieList = viewModel.movies.value as ArrayList<Movie>
                 binding.shimmerFrameLayout.stopShimmerAnimation()
                 binding.shimmerFrameLayout.visibility = View.GONE
                 binding.noInternet.visibility = View.GONE
@@ -177,7 +177,7 @@ class MovieListFragment() : Fragment(), MovieListListener, MovieClickListener, F
         return activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
 
-    override fun setView(list: ArrayList<MovieEntity>) {
+    override fun setView(list: ArrayList<Movie>) {
         movieList = list
         movieListCopy = list
         binding.noInternet.visibility = View.GONE

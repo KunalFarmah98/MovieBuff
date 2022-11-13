@@ -1,8 +1,8 @@
 package com.kunalfarmah.moviebuff.listener
 
-import com.kunalfarmah.moviebuff.room.MovieEntity
+import com.kunalfarmah.moviebuff.model.Movie
 
 interface MovieListListener {
-     fun setView(list:ArrayList<MovieEntity>)
+     fun setView(list:ArrayList<Movie>)
      fun setNoInternetView()
 }

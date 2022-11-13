@@ -9,12 +9,12 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.kunalfarmah.moviebuff.databinding.ListItemMovieGridBinding
 import com.kunalfarmah.moviebuff.listener.MovieClickListener
-import com.kunalfarmah.moviebuff.room.MovieEntity
+import com.kunalfarmah.moviebuff.model.Movie
 
-class MoviesAdapter(context: Context?, list: List<MovieEntity>, listener:MovieClickListener) :
+class MoviesAdapter(context: Context?, list: List<Movie>, listener:MovieClickListener) :
     RecyclerView.Adapter<MoviesAdapter.MoviesViewHolder>() {
 
-    var movieList: List<MovieEntity> = list
+    var movieList: List<Movie> = list
     var mContext: Context? = context
     var movieClick = listener
 
@@ -46,7 +46,7 @@ class MoviesAdapter(context: Context?, list: List<MovieEntity>, listener:MovieCl
             private const val IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
         }
 
-        fun bind(movie: MovieEntity) {
+        fun bind(movie: Movie) {
             binding.image.let {
                 Glide.with(itemView.context).load(IMAGE_BASE_URL + movie.image)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)

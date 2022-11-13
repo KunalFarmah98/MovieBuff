@@ -10,6 +10,7 @@ class Constants {
         val PREFS_NAME = "MovieBuffPrefs"
         val SELECTED_FILTER = "SelectedFilter"
         val SORT_ORDER = "SortOrder"
+        val MOVIES = "Movies"
     }
 
      object SortOrder {

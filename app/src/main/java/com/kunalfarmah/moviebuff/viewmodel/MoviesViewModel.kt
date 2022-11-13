@@ -1,41 +1,34 @@
 package com.kunalfarmah.moviebuff.viewmodel
 
 import android.app.Application
-import android.content.SharedPreferences
-import android.provider.SyncStateContract
-import androidx.hilt.Assisted
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
+import com.google.gson.Gson
 import com.kunalfarmah.moviebuff.listener.MovieListListener
 import com.kunalfarmah.moviebuff.repository.MoviesRepository
-import com.kunalfarmah.moviebuff.model.Movie
 import com.kunalfarmah.moviebuff.retrofit.MovieDetailsResponse
-import com.kunalfarmah.moviebuff.retrofit.Movies
 import com.kunalfarmah.moviebuff.retrofit.PostersItem
 import com.kunalfarmah.moviebuff.retrofit.ReviewItem
-import com.kunalfarmah.moviebuff.room.MovieEntity
+import com.kunalfarmah.moviebuff.model.Movie
+import com.kunalfarmah.moviebuff.preferences.PreferenceManager
 import com.kunalfarmah.moviebuff.util.Constants
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-@ExperimentalCoroutinesApi
+@HiltViewModel
 class MoviesViewModel
-@ViewModelInject
-constructor(
+@Inject constructor(
     private val moviesRepository: MoviesRepository,
     application: Application
 ) : AndroidViewModel(application) {
 
-    private var sPref:SharedPreferences?=application.getSharedPreferences(Constants.PREF,0)
-
-    private val _movies: MutableLiveData<List<MovieEntity>> = MutableLiveData()
+    private val _movies: MutableLiveData<List<Movie>> = MutableLiveData()
     private val _movieDetails: MutableLiveData<MovieDetailsResponse> = MutableLiveData()
     private val _movieReviews: MutableLiveData<List<ReviewItem>> = MutableLiveData()
     private val _movieImages: MutableLiveData<List<PostersItem>> = MutableLiveData()
 
 
-    val movies: MutableLiveData<List<MovieEntity>>
+    val movies: MutableLiveData<List<Movie>>
         get() = _movies
 
     val movieDetails: MutableLiveData<MovieDetailsResponse>
@@ -60,9 +53,7 @@ constructor(
 
 
     fun getAllMovies(){
-        viewModelScope.launch {
-            movies.value = moviesRepository.getMovies()
-        }
+        movies.value = moviesRepository.getMovies()
     }
 
     fun getMovieDetail(id:String){
@@ -76,7 +67,7 @@ constructor(
         var reviews:List<ReviewItem?>?=null
         viewModelScope.launch {
             var response = moviesRepository.getMovieReviews(id)
-            if(null!=response && null!=response.results)
+            if(response?.results != null)
                 reviews = response.results
         }.invokeOnCompletion { movieReviews.value = reviews as List<ReviewItem>? }
     }
@@ -91,11 +82,11 @@ constructor(
     }
 
     fun setSelectedMovie(id:Int){
-        sPref?.edit()?.putInt(Constants.MOVIE_ID,id)?.apply()
+        PreferenceManager.putValue(Constants.MOVIE_ID, id)
     }
 
     fun getSelectedMovie(): String{
-        return sPref?.getInt(Constants.MOVIE_ID,0).toString()
+        return PreferenceManager.getValue(Constants.MOVIE_ID, 0).toString()
     }
 
 
