@@ -3,6 +3,9 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
+    id 'com.google.firebase.firebase-perf'
 }
 
 android {
@@ -77,6 +80,11 @@ dependencies {
 
     implementation 'com.facebook.shimmer:shimmer:0.1.0@aar'
     implementation 'com.jakewharton.timber:timber:5.0.1'
+
+    implementation platform('com.google.firebase:firebase-bom:31.0.2')
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-perf'
 
 }
 

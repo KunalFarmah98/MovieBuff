@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "354890203480",
+    "project_id": "movie-buff-eb99b",
+    "storage_bucket": "movie-buff-eb99b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:354890203480:android:8fa7932c206f853c36252d",
+        "android_client_info": {
+          "package_name": "com.kunalfarmah.moviebuff"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "354890203480-i8j9botr8v3366dt2na4p8pk1pa6ljh4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcFsj-lKNq-2muGdvv5bdbRHwSa5TptVs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "354890203480-i8j9botr8v3366dt2na4p8pk1pa6ljh4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
