@@ -1,45 +1,82 @@
 package com.kunalfarmah.moviebuff.preferences
 
-import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.SharedPreferencesMigration
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import com.kunalfarmah.moviebuff.MoviesApplication.Companion.context
 import com.kunalfarmah.moviebuff.util.Constants
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "appDatastore",
+    produceMigrations = { context -> listOf(SharedPreferencesMigration(context, Constants.PREFS_NAME)) }
+)
+
 object PreferenceManager {
-    val preferences = context?.getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE)
-    private val editor: SharedPreferences.Editor? = preferences?.edit()
+    private val preferencesDataStore = context?.dataStore
     private val TAG = "PreferenceManager"
 
     fun putValue(key: String, value: Any?) {
-        Timber.d(TAG, "Setting $key : $value")
-        when (value) {
-            is Int -> editor?.putInt(key, value as Int)
-            is Float -> editor?.putFloat(key, value as Float)
-            is String -> editor?.putString(key, value as String)
-            is Boolean -> editor?.putBoolean(key, value as Boolean)
-            is Long -> editor?.putLong(key, value as Long)
-            is Set<*> -> editor?.putStringSet(key, value as Set<String>)
-            null -> editor?.putString(key, null)
-            else -> {}
-        }
-        editor?.apply()
+       CoroutineScope(Dispatchers.Default).launch {
+           put(key, value)
+       }
     }
 
-
-    fun getValue(key: String, def: Any?): Any? {
-        var log = "Found value for $key"
-        var value: Any? = null
-        when (def) {
-            is Int -> value = preferences?.getInt(key, def) as Int
-            is Float -> value = preferences?.getFloat(key, def) as Float
-            is String -> value = preferences?.getString(key, def) as String
-            is Boolean -> value = preferences?.getBoolean(key, def) as Boolean
-            is Long -> value = preferences?.getLong(key, def) as Long
-            is Set<*> -> value = preferences?.getStringSet(key, def as Set<String>) as Set<String>
-            null -> value = preferences?.getString(key, null)
+    private suspend fun put(key: String, value: Any?) {
+        Timber.d(TAG, "Setting $key : $value")
+        when (value) {
+            is Int -> preferencesDataStore?.edit {
+                    it[intPreferencesKey(key)] = value as Int
+                }
+            is Float -> preferencesDataStore?.edit {
+                    it[floatPreferencesKey(key)] = value as Float
+                }
+            is String -> preferencesDataStore?.edit {
+                    it[stringPreferencesKey(key)] = value as String
+                }
+            is Boolean -> preferencesDataStore?.edit {
+                    it[booleanPreferencesKey(key)] = value as Boolean
+                }
+            is Long -> preferencesDataStore?.edit {
+                    it[longPreferencesKey(key)] = value as Long
+                }
+            is Set<*> -> preferencesDataStore?.edit {
+                    it[stringSetPreferencesKey(key)] = value as Set<String>
+                }
+            null -> Timber.e(TAG, "Can't set value to null, ignoring")
             else -> {}
         }
+    }
+
+    fun getValue(key: String, def: Any?): Flow<Any?>? {
+        var log = "Found value for $key"
+        var value = preferencesDataStore?.data?.map {
+            when (def) {
+                is Int -> it[intPreferencesKey(key)] ?: def
+                is Float ->  it[floatPreferencesKey(key)] ?: def
+                is String -> it[stringPreferencesKey(key)] ?: def
+                is Boolean ->  it[booleanPreferencesKey(key)] ?: def
+                is Long -> it[longPreferencesKey(key)] ?: def
+                is Set<*> -> it[stringSetPreferencesKey(key)] ?: def
+                null ->  def
+                else -> {}
+            }
+        }
+
         log += if (value != null) {
             ": $value"
         } else {
