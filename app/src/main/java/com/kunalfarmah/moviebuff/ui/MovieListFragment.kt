@@ -142,15 +142,12 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
             R.id.switchView -> {
                 if(display == Constants.Display.GRID){
                     PreferenceManager.putValue(Constants.DISPLAY, Constants.Display.CARDS)
+                    setLayout(Constants.Display.CARDS)
                 }
                 else{
                     PreferenceManager.putValue(Constants.DISPLAY, Constants.Display.GRID)
+                    setLayout(Constants.Display.GRID)
                 }
-                if (display == Constants.Display.GRID)
-                    binding.movieList.layoutManager = GridLayoutManager(context, 2)
-                else
-                    binding.movieList.layoutManager = LinearLayoutManager(context)
-
             }
             R.id.acton_sort_popularity -> {
                 PreferenceManager.putValue(Constants.SORT_ORDER, Constants.SortOrder.POPULAIRTY)
@@ -169,6 +166,13 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun setLayout(layout: String){
+        if (layout == Constants.Display.GRID)
+            binding.movieList.layoutManager = GridLayoutManager(context, 2)
+        else
+            binding.movieList.layoutManager = LinearLayoutManager(context)
     }
 
     private fun isNetworkAvailable(context: Context): Boolean {
