@@ -224,8 +224,11 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
     }
 
     override fun onMovieClick(id: Int, image: ImageView) {
-        viewModel.setSelectedMovie(id)
-        var movieDetailFragment = MovieDetailFragment();
+
+        var movieDetailFragment = MovieDetailFragment()
+        var args = Bundle()
+        args.putString(Constants.MOVIE_ID, id.toString())
+        movieDetailFragment.arguments = args
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             movieDetailFragment.sharedElementEnterTransition = DetailsTransition()

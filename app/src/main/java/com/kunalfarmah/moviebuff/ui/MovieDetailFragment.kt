@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.kunalfarmah.moviebuff.adapter.ImageAdapter
 import com.kunalfarmah.moviebuff.databinding.FragmentMovieDetailBinding
-import com.kunalfarmah.moviebuff.util.Util
+import com.kunalfarmah.moviebuff.util.Constants
 import com.kunalfarmah.moviebuff.viewmodel.MoviesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,14 +29,18 @@ class MovieDetailFragment() : Fragment() {
     }
     val viewModel: MoviesViewModel by viewModels()
     var binding: FragmentMovieDetailBinding? = null
-    var movieId: String? = null
+    private var movieId: String? = null
     var IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
     lateinit var imageAdapter: ImageAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        movieId = arguments?.getString(Constants.MOVIE_ID)
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        movieId = viewModel.getSelectedMovie()
         (activity as AppCompatActivity?)?.supportActionBar?.hide()
         binding = FragmentMovieDetailBinding.inflate(layoutInflater)
         fetchData()
@@ -113,9 +117,14 @@ class MovieDetailFragment() : Fragment() {
     }
 
     private fun fetchData(){
-        viewModel.getMovieDetail(movieId.toString())
-        viewModel.getMovieImages(movieId.toString())
-        viewModel.getMovieReviews(movieId.toString())
+        if(movieId != null) {
+            viewModel.getMovieDetail(movieId!!)
+            viewModel.getMovieImages(movieId!!)
+            viewModel.getMovieReviews(movieId!!)
+        }
+        else {
+            setNoInternetView()
+        }
     }
 
 }
