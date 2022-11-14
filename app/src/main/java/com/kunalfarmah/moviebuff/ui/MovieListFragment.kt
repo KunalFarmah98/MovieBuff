@@ -325,7 +325,7 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
         filterAdapter.list[selectedGenre].selected = false
         filterAdapter.list[pos].selected = true
         filterAdapter.notifyItemChanged(selectedGenre)
-        filterAdapter.notifyItemChanged(pos, 0)
+        filterAdapter.notifyItemChanged(pos)
         PreferenceManager.putValue(Constants.SELECTED_FILTER, pos)
     }
 
