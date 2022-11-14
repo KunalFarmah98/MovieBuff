@@ -31,12 +31,7 @@ constructor(
             movieList
         } else{
             val type =  object : TypeToken<List<Movie>>() {}.type
-            var movies = ""
-            CoroutineScope(Dispatchers.Default).launch {
-                PreferenceManager.getValue(Constants.MOVIES, "")?.collect{
-                    movies = it as String
-                }
-            }
+            var movies = PreferenceManager.getValue(Constants.MOVIES, "")?.first() as String
             if(movies.isNotEmpty())
                 Gson().fromJson(movies, type) as ArrayList<Movie>
             else
