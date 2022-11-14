@@ -18,7 +18,7 @@ constructor(
         return if(Util.isNetworkAvailable()) {
             val response = movieRetrofit.getMovies(Constants.API_KEY, "US")
             movieList = ArrayList()
-            var movies = response.results ?: ArrayList()
+            val movies = response.results ?: ArrayList()
             for (movie in movies)
                 movieList.add(mapToObject(movie))
             PreferenceManager.putValue(Constants.MOVIES, Gson().toJson(movieList))
@@ -85,7 +85,7 @@ constructor(
         return if (Util.isNetworkAvailable()) {
             val response = movieRetrofit.searchMovies(Constants.API_KEY, query)
             movieList = ArrayList()
-            var movies = response.results
+            val movies = response.results
             for (movie in movies!!)
                 movieList.add(mapToObject(movie))
             movieList
@@ -94,7 +94,7 @@ constructor(
     }
 
     fun getMovies(): List<Movie> {
-        var type =  object : TypeToken<List<Movie>>() {}.type
+        val type =  object : TypeToken<List<Movie>>() {}.type
         val movies = PreferenceManager.getValue(Constants.MOVIES, "") as String
         return Gson().fromJson(movies, type) as List<Movie>
     }

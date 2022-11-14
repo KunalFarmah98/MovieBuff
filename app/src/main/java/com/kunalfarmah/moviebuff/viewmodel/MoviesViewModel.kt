@@ -2,8 +2,6 @@ package com.kunalfarmah.moviebuff.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.*
-import com.google.gson.Gson
-import com.kunalfarmah.moviebuff.listener.MovieListListener
 import com.kunalfarmah.moviebuff.repository.MoviesRepository
 import com.kunalfarmah.moviebuff.retrofit.MovieDetailsResponse
 import com.kunalfarmah.moviebuff.retrofit.PostersItem
