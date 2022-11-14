@@ -85,13 +85,5 @@ class MoviesViewModel
         }
     }
 
-    fun setSelectedMovie(id:Int){
-        PreferenceManager.putValue(Constants.MOVIE_ID, id)
-    }
-
-    fun getSelectedMovie(): String{
-        return PreferenceManager.getValue(Constants.MOVIE_ID, 0).toString()
-    }
-
 
 }
