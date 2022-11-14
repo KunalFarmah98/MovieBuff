@@ -1,6 +1,5 @@
 package com.kunalfarmah.moviebuff.repository
 
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.kunalfarmah.moviebuff.model.Movie
@@ -31,7 +30,7 @@ constructor(
             movieList
         } else{
             val type =  object : TypeToken<List<Movie>>() {}.type
-            var movies = PreferenceManager.getValue(Constants.MOVIES, "")?.first() as String
+            val movies = PreferenceManager.getValue(Constants.MOVIES, "")?.first() as String
             if(movies.isNotEmpty())
                 Gson().fromJson(movies, type) as ArrayList<Movie>
             else
@@ -101,7 +100,7 @@ constructor(
 
     suspend fun getMovies(): List<Movie> {
         val type =  object : TypeToken<List<Movie>>() {}.type
-        val movies  = PreferenceManager.getValue(Constants.MOVIES, "")?.first() as String
+        val movies = PreferenceManager.getValue(Constants.MOVIES, "")?.first() as String
         return Gson().fromJson(movies, type) as List<Movie>
     }
 
@@ -128,7 +127,7 @@ constructor(
         }
         else{
             val type =  object : TypeToken<ImageResponse>() {}.type
-            var cache = PreferenceManager.getValue(id + "_images", "")?.first() as String
+            val cache = PreferenceManager.getValue(id + "_images", "")?.first() as String
             if(cache.isNotEmpty())
                  Gson().fromJson(cache, type) as ImageResponse
             else
@@ -144,7 +143,7 @@ constructor(
         }
         else{
             val type =  object : TypeToken<ReviewResponse>() {}.type
-            var cache = PreferenceManager.getValue(id + "_reviews", "")?.first() as String
+            val cache = PreferenceManager.getValue(id + "_reviews", "")?.first() as String
            if(cache.isNotEmpty())
                 Gson().fromJson(cache, type) as ReviewResponse
             else
