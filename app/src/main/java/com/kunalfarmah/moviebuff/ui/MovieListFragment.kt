@@ -63,22 +63,6 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
         setHasOptionsMenu(true)
         binding = FragmentMovieListBinding.inflate(layoutInflater)
 
-        PreferenceManager.preferences?.
-           registerOnSharedPreferenceChangeListener { sharedPreferences, key ->
-               run {
-                   if (key.equals(Constants.SELECTED_FILTER)) {
-                       selectedGenre = sharedPreferences.getInt(key, 0)
-                   }
-                   else if (key.equals(Constants.SORT_ORDER)){
-                       selectedOrder = sharedPreferences.getString(key, "")
-                   }
-                   else if(key.equals(Constants.DISPLAY)){
-                       display = sharedPreferences.getString(key, Constants.Display.GRID)
-                   }
-               }
-               Timber.d(TAG, "SharedPreferences key: $key changed")
-           }
-
         fetchData()
         populateGenres()
         setFilterView()
@@ -140,7 +124,7 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
         val id = item.itemId
         when (id) {
             R.id.switchView -> {
-                if(display == Constants.Display.GRID){
+                if(viewModel.getPrefsValue(display, 3) == Constants.Display.GRID){
                     Toast.makeText(activity, "Switching to cards", Toast.LENGTH_SHORT).show()
                     PreferenceManager.putValue(Constants.DISPLAY, Constants.Display.CARDS)
                     setLayout(Constants.Display.CARDS)
@@ -195,7 +179,7 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
         binding.shimmerFrameLayout.stopShimmerAnimation()
         binding.shimmerFrameLayout.visibility = View.GONE
         mAdapter = MoviesAdapter(context, list, this)
-        if (display == Constants.Display.GRID)
+        if (viewModel.getPrefsValue(display, 3) == Constants.Display.GRID)
             binding.movieList.layoutManager = GridLayoutManager(context, 2)
         else
             binding.movieList.layoutManager = LinearLayoutManager(context)
@@ -205,11 +189,11 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
         binding.movieList.visibility = View.VISIBLE
 
         // applying filtering based on user's preference
-        setGenre(selectedGenre as Int)
-        filterMovies(getGenreId(genreList[selectedGenre as Int].genre))
+        setGenre(viewModel.getPrefsValue(selectedOrder, 0) as Int)
+        filterMovies(getGenreId(genreList[viewModel.getPrefsValue(selectedGenre, 0) as Int].genre))
 
         //sorting based on user preferences
-        sortMovies(selectedOrder as String)
+        sortMovies(viewModel.getPrefsValue(selectedOrder, 3) as String)
     }
     private fun setNoInternetView() {
         binding.shimmerFrameLayout.visibility = View.GONE
@@ -313,10 +297,10 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
     }
 
     private fun setGenre(pos: Int){
-        filterAdapter.list[selectedGenre as Int].selected = false
+        filterAdapter.list[viewModel.getPrefsValue(selectedGenre, 0) as Int].selected = false
         filterAdapter.list[pos].selected = true
-        filterAdapter.notifyItemChanged(selectedGenre as Int)
-        filterAdapter.notifyItemChanged(pos)
+        filterAdapter.notifyItemChanged(viewModel.getPrefsValue(selectedGenre, 0) as Int)
+        filterAdapter.notifyItemChanged(pos, 0)
         PreferenceManager.putValue(Constants.SELECTED_FILTER, pos)
     }
 
@@ -356,7 +340,7 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
     override fun onFilterClick(genre: FilterItem, pos: Int) {
         setGenre(pos)
         filterMovies(getGenreId(genre.genre))
-        sortMovies(selectedOrder as String)
+        sortMovies(viewModel.getPrefsValue(selectedGenre, 3) as String)
     }
 
 }

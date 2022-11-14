@@ -12,6 +12,7 @@ import com.kunalfarmah.moviebuff.model.Movie
 import com.kunalfarmah.moviebuff.preferences.PreferenceManager
 import com.kunalfarmah.moviebuff.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -91,6 +92,27 @@ class MoviesViewModel
 
     fun getSelectedMovie(): String{
         return PreferenceManager.getValue(Constants.MOVIE_ID, 0).toString()
+    }
+
+    fun getPrefsValue(flow: Flow<Any?>?, type: Int): Any? {
+        var value: Any? = null
+        viewModelScope.launch {
+            flow?.collect{
+                value = it
+            }
+        }
+        if(value == null)
+            return null
+        when (type){
+            0 -> return value as Int
+            1 -> return value as Float
+            2 -> return value as Long
+            3 -> return value as String
+            4 -> return value as Boolean
+            5 -> return value as Set<String>
+        }
+        return value
+
     }
 
 

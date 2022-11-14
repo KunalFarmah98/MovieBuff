@@ -7,6 +7,9 @@ import com.kunalfarmah.moviebuff.preferences.PreferenceManager
 import com.kunalfarmah.moviebuff.util.Constants
 import com.kunalfarmah.moviebuff.retrofit.*
 import com.kunalfarmah.moviebuff.util.Util
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MoviesRepository
 constructor(
@@ -18,14 +21,19 @@ constructor(
         return if(Util.isNetworkAvailable()) {
             val response = movieRetrofit.getMovies(Constants.API_KEY, "US")
             movieList = ArrayList()
-            var movies = response.results ?: ArrayList()
+            val movies = response.results ?: ArrayList()
             for (movie in movies)
                 movieList.add(mapToObject(movie))
             PreferenceManager.putValue(Constants.MOVIES, Gson().toJson(movieList))
             movieList
         } else{
             val type =  object : TypeToken<List<Movie>>() {}.type
-            val movies = PreferenceManager.getValue(Constants.MOVIES, "") as String
+            var movies = ""
+            CoroutineScope(Dispatchers.Default).launch {
+                PreferenceManager.getValue(Constants.MOVIES, "")?.collect{
+                    movies = it as String
+                }
+            }
             if(movies.isNotEmpty())
                 Gson().fromJson(movies, type) as ArrayList<Movie>
             else
@@ -85,7 +93,7 @@ constructor(
         return if (Util.isNetworkAvailable()) {
             val response = movieRetrofit.searchMovies(Constants.API_KEY, query)
             movieList = ArrayList()
-            var movies = response.results
+            val movies = response.results
             for (movie in movies!!)
                 movieList.add(mapToObject(movie))
             movieList
@@ -94,8 +102,14 @@ constructor(
     }
 
     fun getMovies(): List<Movie> {
-        var type =  object : TypeToken<List<Movie>>() {}.type
-        val movies = PreferenceManager.getValue(Constants.MOVIES, "") as String
+        val type =  object : TypeToken<List<Movie>>() {}.type
+        var movies = ""
+        CoroutineScope(Dispatchers.Default).launch {
+            PreferenceManager.getValue(Constants.MOVIES, "")?.collect{
+                movies = it as String
+            }
+        }
+
         return Gson().fromJson(movies, type) as List<Movie>
     }
 
@@ -106,7 +120,12 @@ constructor(
             response
         } else{
             val type =  object : TypeToken<MovieDetailsResponse>() {}.type
-            val cache = PreferenceManager.getValue(id + "_details", "") as String
+            var cache = ""
+            CoroutineScope(Dispatchers.Default).launch {
+                PreferenceManager.getValue(id + "_details", "")?.collect{
+                    cache = it as String
+                }
+            }
             if(cache.isNotEmpty())
                  Gson().fromJson(cache, type) as MovieDetailsResponse
             else
@@ -122,7 +141,12 @@ constructor(
         }
         else{
             val type =  object : TypeToken<ImageResponse>() {}.type
-            val cache = PreferenceManager.getValue(id + "_images", "") as String
+            var cache = ""
+            CoroutineScope(Dispatchers.Default).launch {
+                PreferenceManager.getValue(id + "_images", "")?.collect{
+                    cache = it as String
+                }
+            }
             if(cache.isNotEmpty())
                  Gson().fromJson(cache, type) as ImageResponse
             else
@@ -138,7 +162,12 @@ constructor(
         }
         else{
             val type =  object : TypeToken<ReviewResponse>() {}.type
-            val cache = PreferenceManager.getValue(id + "_reviews", "") as String
+            var cache = ""
+            CoroutineScope(Dispatchers.Default).launch {
+                PreferenceManager.getValue(id + "_reviews", "")?.collect{
+                    cache = it as String
+                }
+            }
            if(cache.isNotEmpty())
                 Gson().fromJson(cache, type) as ReviewResponse
             else
