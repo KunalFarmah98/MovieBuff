@@ -1,5 +1,6 @@
 package com.kunalfarmah.moviebuff.repository
 
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.kunalfarmah.moviebuff.model.Movie
@@ -9,6 +10,8 @@ import com.kunalfarmah.moviebuff.retrofit.*
 import com.kunalfarmah.moviebuff.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class MoviesRepository
@@ -101,15 +104,9 @@ constructor(
             ArrayList()
     }
 
-    fun getMovies(): List<Movie> {
+    suspend fun getMovies(): List<Movie> {
         val type =  object : TypeToken<List<Movie>>() {}.type
-        var movies = ""
-        CoroutineScope(Dispatchers.Default).launch {
-            PreferenceManager.getValue(Constants.MOVIES, "")?.collect{
-                movies = it as String
-            }
-        }
-
+        val movies  = PreferenceManager.getValue(Constants.MOVIES, "")?.first() as String
         return Gson().fromJson(movies, type) as List<Movie>
     }
 
@@ -120,12 +117,7 @@ constructor(
             response
         } else{
             val type =  object : TypeToken<MovieDetailsResponse>() {}.type
-            var cache = ""
-            CoroutineScope(Dispatchers.Default).launch {
-                PreferenceManager.getValue(id + "_details", "")?.collect{
-                    cache = it as String
-                }
-            }
+            val cache = PreferenceManager.getValue(id + "_details", "")?.first() as String
             if(cache.isNotEmpty())
                  Gson().fromJson(cache, type) as MovieDetailsResponse
             else
@@ -141,12 +133,7 @@ constructor(
         }
         else{
             val type =  object : TypeToken<ImageResponse>() {}.type
-            var cache = ""
-            CoroutineScope(Dispatchers.Default).launch {
-                PreferenceManager.getValue(id + "_images", "")?.collect{
-                    cache = it as String
-                }
-            }
+            var cache = PreferenceManager.getValue(id + "_images", "")?.first() as String
             if(cache.isNotEmpty())
                  Gson().fromJson(cache, type) as ImageResponse
             else
@@ -162,12 +149,7 @@ constructor(
         }
         else{
             val type =  object : TypeToken<ReviewResponse>() {}.type
-            var cache = ""
-            CoroutineScope(Dispatchers.Default).launch {
-                PreferenceManager.getValue(id + "_reviews", "")?.collect{
-                    cache = it as String
-                }
-            }
+            var cache = PreferenceManager.getValue(id + "_reviews", "")?.first() as String
            if(cache.isNotEmpty())
                 Gson().fromJson(cache, type) as ReviewResponse
             else
