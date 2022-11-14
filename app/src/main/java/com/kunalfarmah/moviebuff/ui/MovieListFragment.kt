@@ -14,6 +14,7 @@ import android.widget.SearchView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -31,7 +32,10 @@ import com.kunalfarmah.moviebuff.model.Movie
 import com.kunalfarmah.moviebuff.util.Constants
 import com.kunalfarmah.moviebuff.viewmodel.MoviesViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 
@@ -52,10 +56,28 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
     private var movieListCopy = ArrayList<Movie>()
     private var genreList = ArrayList<FilterItem>()
     private var genreMap = HashMap<String, Int>()
-    private var selectedGenre = PreferenceManager.getValue(Constants.SELECTED_FILTER, 0)
-    private var selectedOrder = PreferenceManager.getValue(Constants.SORT_ORDER, "")
-    private var display = PreferenceManager.getValue(Constants.DISPLAY, Constants.Display.GRID)
+    private var selectedGenre = 0
+    private var selectedOrder = ""
+    private var display = Constants.Display.GRID
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        CoroutineScope(Dispatchers.Default).launch {
+            PreferenceManager.getValue(Constants.SELECTED_FILTER, 0)?.collect{
+                selectedGenre = it as Int
+            }
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            PreferenceManager.getValue(Constants.SORT_ORDER, "")?.collect {
+                selectedOrder = it as String
+            }
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            PreferenceManager.getValue(Constants.DISPLAY, Constants.Display.GRID)?.collect {
+                display = it as String
+            }
+        }
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -124,7 +146,7 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
         val id = item.itemId
         when (id) {
             R.id.switchView -> {
-                if(viewModel.getPrefsValue(display, 3) == Constants.Display.GRID){
+                if(display == Constants.Display.GRID){
                     Toast.makeText(activity, "Switching to cards", Toast.LENGTH_SHORT).show()
                     PreferenceManager.putValue(Constants.DISPLAY, Constants.Display.CARDS)
                     setLayout(Constants.Display.CARDS)
@@ -179,7 +201,7 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
         binding.shimmerFrameLayout.stopShimmerAnimation()
         binding.shimmerFrameLayout.visibility = View.GONE
         mAdapter = MoviesAdapter(context, list, this)
-        if (viewModel.getPrefsValue(display, 3) == Constants.Display.GRID)
+        if (display == Constants.Display.GRID)
             binding.movieList.layoutManager = GridLayoutManager(context, 2)
         else
             binding.movieList.layoutManager = LinearLayoutManager(context)
@@ -189,11 +211,11 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
         binding.movieList.visibility = View.VISIBLE
 
         // applying filtering based on user's preference
-        setGenre(viewModel.getPrefsValue(selectedOrder, 0) as Int)
-        filterMovies(getGenreId(genreList[viewModel.getPrefsValue(selectedGenre, 0) as Int].genre))
+        setGenre(selectedGenre)
+        filterMovies(getGenreId(genreList[selectedGenre].genre))
 
         //sorting based on user preferences
-        sortMovies(viewModel.getPrefsValue(selectedOrder, 3) as String)
+        sortMovies(selectedOrder)
     }
     private fun setNoInternetView() {
         binding.shimmerFrameLayout.visibility = View.GONE
@@ -297,9 +319,9 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
     }
 
     private fun setGenre(pos: Int){
-        filterAdapter.list[viewModel.getPrefsValue(selectedGenre, 0) as Int].selected = false
+        filterAdapter.list[selectedGenre].selected = false
         filterAdapter.list[pos].selected = true
-        filterAdapter.notifyItemChanged(viewModel.getPrefsValue(selectedGenre, 0) as Int)
+        filterAdapter.notifyItemChanged(selectedGenre)
         filterAdapter.notifyItemChanged(pos, 0)
         PreferenceManager.putValue(Constants.SELECTED_FILTER, pos)
     }
@@ -340,7 +362,7 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
     override fun onFilterClick(genre: FilterItem, pos: Int) {
         setGenre(pos)
         filterMovies(getGenreId(genre.genre))
-        sortMovies(viewModel.getPrefsValue(selectedGenre, 3) as String)
+        sortMovies(selectedOrder)
     }
 
 }
