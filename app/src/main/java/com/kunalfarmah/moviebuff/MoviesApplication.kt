@@ -16,6 +16,7 @@ class MoviesApplication: Application() {
     override fun onCreate() {
         super.onCreate()
         context = this
-        Timber.plant(Timber.asTree())
+        if(BuildConfig.DEBUG)
+            Timber.plant(Timber.DebugTree())
     }
 }
