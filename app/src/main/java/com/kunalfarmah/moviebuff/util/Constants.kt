@@ -16,7 +16,7 @@ class Constants {
 
      object SortOrder {
          val POPULAIRTY = "Popularity"
-         val RELEASE_DATE = "ReleaseData"
+         val RELEASE_DATE = "ReleaseDate"
          val RATING = "Rating"
     }
 
