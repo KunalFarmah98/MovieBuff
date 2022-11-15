@@ -29,6 +29,9 @@
             <item
                 android:id="@+id/acton_sort_popularity"
                 android:title="@string/by_popularity" />
+            <item
+                android:id="@+id/action_version"
+                android:title="@string/appVersion" />
         </menu>
     </item>
 </menu>
