@@ -2,6 +2,7 @@ package com.kunalfarmah.moviebuff.ui
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
@@ -55,29 +56,29 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
     private var selectedGenre = PreferenceManager.getValue(Constants.SELECTED_FILTER, 0)
     private var selectedOrder = PreferenceManager.getValue(Constants.SORT_ORDER, "")
     private var display = PreferenceManager.getValue(Constants.DISPLAY, Constants.Display.GRID)
+    private val listener = OnSharedPreferenceChangeListener { sharedPreferences, key ->
+        run {
+            if (key.equals(Constants.SELECTED_FILTER)) {
+                selectedGenre = sharedPreferences.getInt(key, 0)
+            } else if (key.equals(Constants.SORT_ORDER)) {
+                selectedOrder = sharedPreferences.getString(key, "")
+            } else if (key.equals(Constants.DISPLAY)) {
+                display = sharedPreferences.getString(key, Constants.Display.GRID)
+            }
+            Timber.d("$TAG: SharedPreferences value in $key changed")
+        }
+    }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        PreferenceManager.preferences?.registerOnSharedPreferenceChangeListener(listener)
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         setHasOptionsMenu(true)
         binding = FragmentMovieListBinding.inflate(layoutInflater)
-
-        PreferenceManager.preferences?.
-           registerOnSharedPreferenceChangeListener { sharedPreferences, key ->
-               run {
-                   if (key.equals(Constants.SELECTED_FILTER)) {
-                       selectedGenre = sharedPreferences.getInt(key, 0)
-                   }
-                   else if (key.equals(Constants.SORT_ORDER)){
-                       selectedOrder = sharedPreferences.getString(key, "")
-                   }
-                   else if(key.equals(Constants.DISPLAY)){
-                       display = sharedPreferences.getString(key, Constants.Display.GRID)
-                   }
-               }
-               Timber.d(TAG, "SharedPreferences key: $key changed")
-           }
 
         fetchData()
         populateGenres()
@@ -360,6 +361,11 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
         setGenre(pos)
         filterMovies(getGenreId(genre.genre))
         sortMovies(selectedOrder as String)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        PreferenceManager.preferences?.unregisterOnSharedPreferenceChangeListener(listener)
     }
 
 }

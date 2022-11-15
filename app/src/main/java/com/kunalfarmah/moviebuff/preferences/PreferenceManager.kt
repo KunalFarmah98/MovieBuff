@@ -12,7 +12,7 @@ object PreferenceManager {
     private val TAG = "PreferenceManager"
 
     fun putValue(key: String, value: Any?) {
-        Timber.d(TAG, "Setting $key : $value")
+        Timber.d("$TAG: Setting $key : $value")
         when (value) {
             is Int -> editor?.putInt(key, value as Int)
             is Float -> editor?.putFloat(key, value as Float)
@@ -45,7 +45,7 @@ object PreferenceManager {
         } else {
             ": null"
         }
-        Timber.d(TAG, log)
+        Timber.d("$TAG: $log")
         return value
     }
 }
