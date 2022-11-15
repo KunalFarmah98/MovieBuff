@@ -17,6 +17,7 @@ import com.kunalfarmah.moviebuff.util.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -37,28 +38,23 @@ object PreferenceManager {
     }
 
     private suspend fun put(key: String, value: Any?) {
-        Timber.d(TAG, "Setting $key : $value")
-        when (value) {
-            is Int -> preferencesDataStore?.edit {
-                    it[intPreferencesKey(key)] = value as Int
+        Timber.d("$TAG: Setting $key : $value")
+        try {
+            preferencesDataStore?.edit {
+                when (value) {
+                    is Int -> it[intPreferencesKey(key)] = value
+                    is Float -> it[floatPreferencesKey(key)] = value
+                    is String -> it[stringPreferencesKey(key)] = value
+                    is Boolean -> it[booleanPreferencesKey(key)] = value
+                    is Long -> it[longPreferencesKey(key)] = value
+                    is Set<*> -> it[stringSetPreferencesKey(key)] = value as Set<String>
+                    null -> Timber.e("$TAG: Can't set value to null, ignoring")
+                    else -> {}
                 }
-            is Float -> preferencesDataStore?.edit {
-                    it[floatPreferencesKey(key)] = value as Float
-                }
-            is String -> preferencesDataStore?.edit {
-                    it[stringPreferencesKey(key)] = value as String
-                }
-            is Boolean -> preferencesDataStore?.edit {
-                    it[booleanPreferencesKey(key)] = value as Boolean
-                }
-            is Long -> preferencesDataStore?.edit {
-                    it[longPreferencesKey(key)] = value as Long
-                }
-            is Set<*> -> preferencesDataStore?.edit {
-                    it[stringSetPreferencesKey(key)] = value as Set<String>
-                }
-            null -> Timber.e(TAG, "Can't set value to null, ignoring")
-            else -> {}
+            }
+        }
+        catch (e:Exception){
+            Timber.e("$TAG: Error setting value of $key: ${e.message ?: ""}")
         }
     }
 
@@ -75,6 +71,8 @@ object PreferenceManager {
                 null ->  def
                 else -> {}
             }
+        }?.catch {
+            Timber.e("$TAG: Error while getting value of $key: ${it.message}")
         }
 
         log += if (value != null) {
@@ -82,7 +80,7 @@ object PreferenceManager {
         } else {
             ": null"
         }
-        Timber.d(TAG, log)
+        Timber.d("$TAG: $log")
         return value
     }
 }

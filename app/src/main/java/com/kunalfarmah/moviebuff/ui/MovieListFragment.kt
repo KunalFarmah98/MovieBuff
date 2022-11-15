@@ -64,16 +64,19 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
         super.onCreate(savedInstanceState)
         CoroutineScope(Dispatchers.Default).launch {
             PreferenceManager.getValue(Constants.SELECTED_FILTER, 0)?.collect{
+                Timber.d("Datastore: Collected ${Constants.SELECTED_FILTER} -> ${it?:""}")
                 selectedGenre = it as Int
             }
         }
         CoroutineScope(Dispatchers.Default).launch {
             PreferenceManager.getValue(Constants.SORT_ORDER, "")?.collect {
+                Timber.d("Datastore: Collected ${Constants.SORT_ORDER} -> ${it?:""}")
                 selectedOrder = it as String
             }
         }
         CoroutineScope(Dispatchers.Default).launch {
             PreferenceManager.getValue(Constants.DISPLAY, Constants.Display.GRID)?.collect {
+                Timber.d("Datastore: Collected ${Constants.DISPLAY} -> ${it?:""}")
                 display = it as String
             }
         }
