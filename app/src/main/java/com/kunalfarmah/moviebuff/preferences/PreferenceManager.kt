@@ -18,6 +18,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -63,24 +65,26 @@ object PreferenceManager {
         var value = preferencesDataStore?.data?.map {
             when (def) {
                 is Int -> it[intPreferencesKey(key)] ?: def
-                is Float ->  it[floatPreferencesKey(key)] ?: def
+                is Float -> it[floatPreferencesKey(key)] ?: def
                 is String -> it[stringPreferencesKey(key)] ?: def
-                is Boolean ->  it[booleanPreferencesKey(key)] ?: def
+                is Boolean -> it[booleanPreferencesKey(key)] ?: def
                 is Long -> it[longPreferencesKey(key)] ?: def
                 is Set<*> -> it[stringSetPreferencesKey(key)] ?: def
-                null ->  def
+                null -> def
                 else -> {}
             }
         }?.catch {
             Timber.e("$TAG: Error while getting value of $key: ${it.message}")
         }
 
-        log += if (value != null) {
-            ": $value"
-        } else {
-            ": null"
+        CoroutineScope(Dispatchers.IO).launch {
+            log += if (value != null) {
+                ": ${value.first()}"
+            } else {
+                ": null"
+            }
+            Timber.d("$TAG: $log")
         }
-        Timber.d("$TAG: $log")
         return value
     }
 }
