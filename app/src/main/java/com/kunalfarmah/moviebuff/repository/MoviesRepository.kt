@@ -96,7 +96,10 @@ constructor(
     fun getMovies(): List<Movie> {
         val type =  object : TypeToken<List<Movie>>() {}.type
         val movies = PreferenceManager.getValue(Constants.MOVIES, "") as String
-        return Gson().fromJson(movies, type) as List<Movie>
+        return if(movies.isNotEmpty())
+            Gson().fromJson(movies, type) as List<Movie>
+        else
+            ArrayList()
     }
 
     suspend fun getMovieDetails(id: String): MovieDetailsResponse? {
