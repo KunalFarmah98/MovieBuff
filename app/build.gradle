@@ -16,8 +16,8 @@ android {
         applicationId "com.kunalfarmah.moviebuff"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 2
-        versionName "1.0.1-datastore"
+        versionCode 3
+        versionName "1.0.2-datastore-synchronous"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
