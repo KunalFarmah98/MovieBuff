@@ -9,9 +9,11 @@ import com.kunalfarmah.moviebuff.retrofit.*
 import com.kunalfarmah.moviebuff.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlin.coroutines.coroutineContext
 
 class MoviesRepository
 constructor(
@@ -29,8 +31,9 @@ constructor(
             PreferenceManager.putValue(Constants.MOVIES, Gson().toJson(movieList))
             movieList
         } else{
+            coroutineContext.cancelChildren()
             val type =  object : TypeToken<List<Movie>>() {}.type
-            val movies = PreferenceManager.getValue(Constants.MOVIES, "")?.first() as String
+            val movies = PreferenceManager.getValue(Constants.MOVIES, "") as String
             if(movies.isNotEmpty())
                 Gson().fromJson(movies, type) as ArrayList<Movie>
             else
@@ -98,9 +101,9 @@ constructor(
             ArrayList()
     }
 
-    suspend fun getMovies(): List<Movie> {
+    fun getMovies(): List<Movie> {
         val type =  object : TypeToken<List<Movie>>() {}.type
-        val movies = PreferenceManager.getValue(Constants.MOVIES, "")?.first() as String
+        val movies = PreferenceManager.getValue(Constants.MOVIES, "") as String
         return Gson().fromJson(movies, type) as List<Movie>
     }
 
@@ -110,8 +113,9 @@ constructor(
             PreferenceManager.putValue(id + "_details", Gson().toJson(response))
             response
         } else{
+            coroutineContext.cancelChildren()
             val type =  object : TypeToken<MovieDetailsResponse>() {}.type
-            val cache = PreferenceManager.getValue(id + "_details", "")?.first() as String
+            val cache = PreferenceManager.getValue(id + "_details", "") as String
             if(cache.isNotEmpty())
                  Gson().fromJson(cache, type) as MovieDetailsResponse
             else
@@ -126,8 +130,9 @@ constructor(
             response
         }
         else{
+            coroutineContext.cancelChildren()
             val type =  object : TypeToken<ImageResponse>() {}.type
-            val cache = PreferenceManager.getValue(id + "_images", "")?.first() as String
+            val cache = PreferenceManager.getValue(id + "_images", "") as String
             if(cache.isNotEmpty())
                  Gson().fromJson(cache, type) as ImageResponse
             else
@@ -142,8 +147,9 @@ constructor(
             return response
         }
         else{
+            coroutineContext.cancelChildren()
             val type =  object : TypeToken<ReviewResponse>() {}.type
-            val cache = PreferenceManager.getValue(id + "_reviews", "")?.first() as String
+            val cache = PreferenceManager.getValue(id + "_reviews", "") as String
            if(cache.isNotEmpty())
                 Gson().fromJson(cache, type) as ReviewResponse
             else

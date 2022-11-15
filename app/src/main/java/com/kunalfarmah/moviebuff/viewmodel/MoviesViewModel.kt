@@ -55,9 +55,7 @@ class MoviesViewModel
 
 
     fun getAllMovies(){
-        viewModelScope.launch {
-            movies.value = moviesRepository.getMovies()
-        }
+        movies.value = moviesRepository.getMovies()
     }
 
     fun getMovieDetail(id:String){

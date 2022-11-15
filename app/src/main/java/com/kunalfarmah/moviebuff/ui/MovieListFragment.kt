@@ -1,20 +1,14 @@
 package com.kunalfarmah.moviebuff.ui
 
-import android.content.Context
-import android.content.SharedPreferences
-import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
 import android.view.*
-import android.view.View.OnClickListener
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,25 +17,23 @@ import com.kunalfarmah.moviebuff.R
 import com.kunalfarmah.moviebuff.adapter.FilterAdapter
 import com.kunalfarmah.moviebuff.adapter.MoviesAdapter
 import com.kunalfarmah.moviebuff.databinding.FragmentMovieListBinding
+import com.kunalfarmah.moviebuff.listener.DatastorePreferencesChangedListener
 import com.kunalfarmah.moviebuff.listener.FilterClickListener
 import com.kunalfarmah.moviebuff.listener.MovieClickListener
-import com.kunalfarmah.moviebuff.listener.MovieListListener
 import com.kunalfarmah.moviebuff.model.FilterItem
 import com.kunalfarmah.moviebuff.preferences.PreferenceManager
 import com.kunalfarmah.moviebuff.model.Movie
 import com.kunalfarmah.moviebuff.util.Constants
+import com.kunalfarmah.moviebuff.util.Util
 import com.kunalfarmah.moviebuff.viewmodel.MoviesViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 
 @AndroidEntryPoint
 @ExperimentalCoroutinesApi
-class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener {
+class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener, DatastorePreferencesChangedListener {
 
     lateinit var binding: FragmentMovieListBinding
 
@@ -56,27 +48,13 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
     private var movieListCopy = ArrayList<Movie>()
     private var genreList = ArrayList<FilterItem>()
     private var genreMap = HashMap<String, Int>()
-    private var selectedGenre = 0
-    private var selectedOrder = ""
-    private var display = Constants.Display.GRID
+    private var selectedGenre = PreferenceManager.getValue(Constants.SELECTED_FILTER, 0) as Int
+    private var selectedOrder = PreferenceManager.getValue(Constants.SORT_ORDER, "") as String
+    private var display = PreferenceManager.getValue(Constants.DISPLAY, Constants.Display.GRID) as String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        CoroutineScope(Dispatchers.Default).launch {
-            PreferenceManager.getValue(Constants.SELECTED_FILTER, 0)?.collect{
-                selectedGenre = it as Int
-            }
-        }
-        CoroutineScope(Dispatchers.Default).launch {
-            PreferenceManager.getValue(Constants.SORT_ORDER, "")?.collect {
-                selectedOrder = it as String
-            }
-        }
-        CoroutineScope(Dispatchers.Default).launch {
-            PreferenceManager.getValue(Constants.DISPLAY, Constants.Display.GRID)?.collect {
-                display = it as String
-            }
-        }
+        PreferenceManager.listener = this
     }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -183,13 +161,6 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
             binding.movieList.layoutManager = LinearLayoutManager(context)
     }
 
-    private fun isNetworkAvailable(context: Context): Boolean {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetworkInfo = connectivityManager.activeNetworkInfo
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected
-    }
-
     private fun setViews(list: ArrayList<Movie>){
         if(list.isEmpty()){
             setNoInternetView()
@@ -260,7 +231,7 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
     private fun fetchData() {
         binding.shimmerFrameLayout.visibility = View.VISIBLE
         binding.shimmerFrameLayout.startShimmerAnimation()
-        if (isNetworkAvailable(requireContext())) {
+        if (Util.isNetworkAvailable()) {
             viewModel.fetchAllMovies()
         } else {
             viewModel.getAllMovies()
@@ -366,6 +337,21 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
         setGenre(pos)
         filterMovies(getGenreId(genre.genre))
         sortMovies(selectedOrder)
+    }
+
+    override fun onDataStorePreferencesChanged(key: String, value: Any) {
+        Timber.d("Datastore: $key changed value to $value")
+        when (key) {
+            Constants.SELECTED_FILTER -> {
+                selectedGenre = value as Int
+            }
+            Constants.SORT_ORDER -> {
+                selectedOrder = value as String
+            }
+            Constants.DISPLAY -> {
+                display = value as String
+            }
+        }
     }
 
 }
