@@ -29,6 +29,8 @@ import com.kunalfarmah.moviebuff.viewmodel.MoviesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
+import kotlin.math.max
+import kotlin.math.min
 
 
 @AndroidEntryPoint
@@ -297,6 +299,10 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener,
         filterAdapter.list[pos].selected = true
         filterAdapter.notifyItemChanged(selectedGenre)
         filterAdapter.notifyItemChanged(pos)
+        if(selectedGenre < pos)
+            binding.genreFilter.scrollToPosition(min(movieList.size, pos + 2))
+        else
+            binding.genreFilter.scrollToPosition(max(0,pos - 2))
         PreferenceManager.putValue(Constants.SELECTED_FILTER, pos)
     }
 
