@@ -37,7 +37,7 @@ class ImageAdapter(context: Context, images: List<PostersItem>?) : RecyclerView.
         fun bind(postersItem: PostersItem){
             binding?.imageView?.let {
                 Glide.with(itemView.context).load(IMAGE_BASE_URL+postersItem.filePath).diskCacheStrategy(
-                    DiskCacheStrategy.ALL).into(it)
+                    DiskCacheStrategy.RESOURCE).into(it)
             }
         }
     }

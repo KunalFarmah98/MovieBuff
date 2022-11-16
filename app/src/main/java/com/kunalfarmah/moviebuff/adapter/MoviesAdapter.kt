@@ -49,7 +49,7 @@ class MoviesAdapter(context: Context?, list: List<Movie>, listener:MovieClickLis
         fun bind(movie: Movie) {
             binding.image.let {
                 Glide.with(itemView.context).load(IMAGE_BASE_URL + movie.image)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                     .into(it)
             }
             binding.title.text = movie.title
