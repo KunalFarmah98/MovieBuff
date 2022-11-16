@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.kunalfarmah.moviebuff.adapter.ImageAdapter
 import com.kunalfarmah.moviebuff.databinding.FragmentMovieDetailBinding
 import com.kunalfarmah.moviebuff.util.Constants
@@ -66,11 +67,13 @@ class MovieDetailFragment() : Fragment() {
             binding?.releaseDate?.text = String.format("Released on: %s", details.releaseDate)
             binding?.runtime?.text = String.format("Runtime: %s Min", details.runtime)
             binding?.banner?.let { view ->
-                Glide.with(requireContext()).load(IMAGE_BASE_URL + details.backdropPath)
+                Glide.with(requireContext()).load(IMAGE_BASE_URL + details.backdropPath).diskCacheStrategy(
+                    DiskCacheStrategy.RESOURCE)
                     .into(view)
             }
             binding?.image?.let { view ->
-                Glide.with(requireContext()).load(IMAGE_BASE_URL + details.posterPath)
+                Glide.with(requireContext()).load(IMAGE_BASE_URL + details.posterPath).diskCacheStrategy(
+                    DiskCacheStrategy.RESOURCE)
                     .into(view)
             }
             binding?.overview?.text = details.overview
