@@ -4,6 +4,9 @@ import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import com.kunalfarmah.moviebuff.MoviesApplication.Companion.context
 import com.kunalfarmah.moviebuff.util.Constants
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 object PreferenceManager {
@@ -23,7 +26,7 @@ object PreferenceManager {
             null -> editor?.putString(key, null)
             else -> {}
         }
-        editor?.apply()
+        commitAsync()
     }
 
 
@@ -47,5 +50,11 @@ object PreferenceManager {
         }
         Timber.d("$TAG: $log")
         return value
+    }
+
+    private fun commitAsync(){
+        CoroutineScope(Dispatchers.IO).launch {
+            editor?.commit()
+        }
     }
 }
