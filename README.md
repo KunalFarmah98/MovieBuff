@@ -11,12 +11,16 @@
   height = 330/>
   <img hspace="10" src="https://github.com/KunalFarmah98/MovieBuff/blob/devfest-main/app/src/main/res/raw/filtered.png" width =175 
   height = 330/>
+</p>
+
+### 3. Can filter movies based on their genres.
+### 4. Can sort movies by rating, popularity and release date.
+<p vspace = "20" align="center" >
+  <img hspace="10" src="https://github.com/KunalFarmah98/MovieBuff/blob/devfest-main/app/src/main/res/raw/filter2.png" width =175 
+  height = 330/>
   <img hspace="10" src="https://github.com/KunalFarmah98/MovieBuff/blob/devfest-main/app/src/main/res/raw/search.png" width =175 
   height = 330/>
   <img hspace="10" src="https://github.com/KunalFarmah98/MovieBuff/blob/devfest-main/app/src/main/res/raw/sort.png" width =175 
   height = 330/>
 </p>
-
-### 3. Can filter movies based on their genres.
-### 4. Can sort movies by rating, popularity and release date.
 ### 5. Allows users to search for their movies.
