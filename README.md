@@ -1,7 +1,7 @@
 # A TMDB like app for all the movie lovers
 
 
-# Features: 
+## Features: 
 ### 1. Lists latest movies on the home screen.
 ### 2. Shows comprehensive details about the movies.
 
@@ -23,4 +23,5 @@
   <img hspace="10" src="https://github.com/KunalFarmah98/MovieBuff/blob/devfest-main/app/src/main/res/raw/sort.png" width =175 
   height = 330/>
 </p>
+
 ### 5. Allows users to search for their movies.
