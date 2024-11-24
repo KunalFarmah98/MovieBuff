@@ -118,7 +118,14 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
 
             override fun onQueryTextChange(query: String): Boolean {
-                return false
+                if(query.isEmpty()){
+                    fetchData()
+                    return false
+                }
+                if(query.length < 3)
+                    return false
+                viewModel.searchAllMovies(this@MovieListFragment, query)
+                return true
             }
 
             override fun onQueryTextSubmit(query: String): Boolean {
