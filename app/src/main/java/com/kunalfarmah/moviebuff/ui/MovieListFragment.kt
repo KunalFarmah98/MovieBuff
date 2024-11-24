@@ -124,7 +124,7 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
                 }
                 if(query.length < 3)
                     return false
-                viewModel.searchAllMovies(this@MovieListFragment, query)
+                viewModel.searchAllMovies(query)
                 return true
             }
 
