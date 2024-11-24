@@ -55,7 +55,7 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
     private var movieListCopy = ArrayList<Movie>()
     private var genreList = ArrayList<FilterItem>()
     private var genreMap = HashMap<String, Int>()
-    private var selectedGenre = PreferenceManager.getValue(Constants.SELECTED_FILTER, 0)
+    private var selectedGenre: Int = PreferenceManager.getValue(Constants.SELECTED_FILTER, 0) as Int
     private var selectedOrder = PreferenceManager.getValue(Constants.SORT_ORDER, "")
     private var display = PreferenceManager.getValue(Constants.DISPLAY, Constants.Display.GRID)
     private val listener = OnSharedPreferenceChangeListener { sharedPreferences, key ->
@@ -116,7 +116,7 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
                 }
                 if(query.length < 3)
                     return false
-                viewModel.searchAllMovies(this@MovieListFragment, query)
+                viewModel.searchAllMovies(query)
                 return true
             }
 
@@ -326,7 +326,7 @@ class MovieListFragment() : Fragment(), MovieClickListener, FilterClickListener 
     }
 
     private fun setGenre(pos: Int){
-        filterAdapter.list[selectedGenre as Int].selected = false
+        filterAdapter.list[selectedGenre].selected = false
         filterAdapter.list[pos].selected = true
         filterAdapter.notifyItemChanged(selectedGenre as Int)
         filterAdapter.notifyItemChanged(pos)
